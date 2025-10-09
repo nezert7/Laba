@@ -7,13 +7,38 @@ class Log_Window(QWidget):
     def  __init__(self):
         super().__init__()
         self.initializeUI()
+
     def initializeUI(self):#задача базовых настроек приложения
         self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
         self.setWindowTitle("регистрация")
         self.setUpLog_Window()
         self.show()
+
     def setUpLog_Window(self):
-        pass
+        main_v_box = QVBoxLayout()
+        logr = QLabel("придумайте логин", self)
+        self.input_logr = QLineEdit(self)
+        pasr = QLabel("придумайте пароль", self)
+        self.input_pasr = QLineEdit(self)
+        pasr2 = QLabel("повторите пароль")
+        self.input_pasr2 = QLineEdit(self)
+
+        logr_h_box = QHBoxLayout()
+        pasr_h_box = QHBoxLayout()
+        pasr2_h_box = QHBoxLayout()
+        logr_h_box.addWidget(logr)
+        logr_h_box.addWidget(self.input_logr)
+        pasr_h_box.addWidget(pasr)
+        pasr_h_box.addWidget(self.input_pasr)
+        pasr2_h_box.addWidget(pasr2)
+        pasr2_h_box.addWidget(self.input_pasr2)
+        main_v_box.addLayout(logr_h_box)
+        main_v_box.addLayout(pasr_h_box)
+        main_v_box.addLayout(pasr2_h_box)
+        
+
+        self.setLayout(main_v_box)
+
 
 class First_Window(QWidget):
     def __init__(self):
