@@ -1,5 +1,5 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QStackedLayout
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QStackedLayout, QComboBox
 from PyQt6.QtGui import QPixmap #для картинок
 from PyQt6.QtCore import Qt
 
@@ -15,7 +15,17 @@ class Main_Window(QWidget):
         self.show()
 
     def setUpMain_Window(self):
-        pass
+        main_v_box = QVBoxLayout()
+        sub_name = QLabel("предмет:", self)
+        vari = QComboBox(self)
+        vari.addItems([" ", "матан", "линал", "дискра", "прога", "тп", "цг"])
+
+        sub_h_box = QHBoxLayout()
+        sub_h_box.addWidget(sub_name)
+        sub_h_box.addWidget(vari)
+        main_v_box.addLayout(sub_h_box)
+
+        self.setLayout(main_v_box)
 
 class Log_Window(QWidget):
     def  __init__(self):
