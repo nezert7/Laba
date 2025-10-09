@@ -1,8 +1,9 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QStackedLayout
 from PyQt6.QtGui import QPixmap #для картинок
+from PyQt6.QtCore import Qt
 
-class MainWindow(QWidget):
+class First_Window(QWidget):
     def __init__(self):
         super().__init__()
         self.screen_vhod = QWidget()
@@ -10,14 +11,15 @@ class MainWindow(QWidget):
         self.initializeUI()
 
     def initializeUI(self):#задача базовых настроек приложения
-        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800б 600 - размер окна
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
         self.setWindowTitle("заголовок окна")
-        self.setUpMainWindow()
+        self.setUpFirst_Window()
         self.show()
 
-    def setUpMainWindow(self):#расположение элементов на окне
+    def setUpFirst_Window(self):#расположение элементов на окне
         main_v_box = QVBoxLayout()
-        
+        head_text = QLabel("авторизация", self)
+        head_text.setAlignment(Qt.AlignmentFlag.AlignRight)
         log = QLabel("введите логин", self)
         self.input_log = QLineEdit(self)
         self.input_log.textEdited.connect(self.checkCode)
@@ -26,6 +28,8 @@ class MainWindow(QWidget):
         self.input_pas.textEdited.connect(self.checkCode)
         self.ot_button = QPushButton("войти", self)
         self.ot_button.setEnabled(False)
+        self.log_button = QPushButton("зарегистрироваться", self)
+
 
         log_h_box = QHBoxLayout()
         pas_h_box = QHBoxLayout()
@@ -36,6 +40,7 @@ class MainWindow(QWidget):
         main_v_box.addLayout(log_h_box)
         main_v_box.addLayout(pas_h_box)
         main_v_box.addWidget(self.ot_button)
+        main_v_box.addWidget(self.log_button)
 
         self.stacked_layout = QStackedLayout()
         self.stacked_layout.addWidget(self.screen_vhod)
@@ -52,7 +57,7 @@ class MainWindow(QWidget):
     
     def gotoScreen_kon(self):#переход на новую страницу
         self.stacked_layout.setCurrentWidget(self.screen_kon)
-        
+
 app = QApplication(sys.argv)
-window = MainWindow()
+window = First_Window()
 sys.exit(app.exec()) #открытие приложения
