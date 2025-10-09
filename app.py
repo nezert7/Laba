@@ -1,6 +1,6 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, \
-    QStackedLayout
+    QStackedLayout, QDialog
 from PyQt6.QtGui import QPixmap  # для картинок
 from PyQt6.QtCore import Qt
 
@@ -20,7 +20,7 @@ class Main_Window(QWidget):
         pass
 
 
-class Log_Window(QWidget):
+class Log_Window(QDialog):
     def __init__(self):
         super().__init__()
         self.initializeUI()
@@ -63,14 +63,18 @@ class Log_Window(QWidget):
         self.setLayout(main_v_box)
 
     def addBD_goMain(self):
-        if len(self.input_logr.text()) > 0 and len(self.input_pasr.text()) > 0 and (
+        """Проверка валидности полей и активация кнопки"""
+        if (self.input_logr.text() and self.input_pasr.text() and
                 self.input_pasr.text() == self.input_pasr2.text()):
             self.log_button.setEnabled(True)
-            # придумать как добавить введенные данные в бд
             self.log_button.clicked.connect(self.goto_ScreenFirst)
-            return self.input_logr, self.input_pasr
+            self.accept()
         else:
             self.log_button.setEnabled(False)
+
+    def get_data(self):
+        """Вызывается после закрытия диалога, возвращает текст логина и пароля"""
+        return self.input_logr.text(), self.input_pasr.text()
 
     def goto_ScreenFirst(self):
         self.screen_log = First_Window()
@@ -132,8 +136,10 @@ class First_Window(QWidget):
         self.screen_main = Main_Window()
         self.screen_main.show()
 
-def run():
+
+def run(): # открытие приложения
     app = QApplication(sys.argv)
     window = Log_Window()
-    login, password = window.addBD_goMain()
-    sys.exit(app.exec())  # открытие приложения
+    window.exec()
+    login, password = window.get_data()
+    return login, password

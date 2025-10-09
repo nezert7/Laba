@@ -36,9 +36,8 @@ def hash_password(password): # Функция для хеширования па
 
 
 def create_account():
-    print(0)# Функция для регистрации пользователей
-    user_name, password = input(), input()
-    print(user_name, password)
+    ss = run()
+    user_name, password = ss[0], ss[1]
     all_users = cursor.execute("""SELECT NAME FROM USERS""")
     all_users = [str(x)[2:-3] for x in all_users]
     if user_name == '':
@@ -154,5 +153,5 @@ def upload_file_from_db():  # Здесь мы выгружаем из db ссы�
 # create_subject()
 # download_inf_file_in_db(k, subject_name, date_note)
 # print(upload_file_from_db())
-#create_account()
+create_account()
 connect.commit()
