@@ -1,15 +1,17 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QStackedLayout
-from PyQt6.QtGui import QPixmap #для картинок
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, \
+    QStackedLayout
+from PyQt6.QtGui import QPixmap  # для картинок
 from PyQt6.QtCore import Qt
 
+
 class Main_Window(QWidget):
-    def  __init__(self):
+    def __init__(self):
         super().__init__()
         self.initializeUI()
 
-    def initializeUI(self):#задача базовых настроек приложения
-        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+    def initializeUI(self):  # задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600)  # 600, 200 - отступ при создании, 800, 600 - размер окна
         self.setWindowTitle("главное окно")
         self.setUpMain_Window()
         self.show()
@@ -17,13 +19,14 @@ class Main_Window(QWidget):
     def setUpMain_Window(self):
         pass
 
+
 class Log_Window(QWidget):
-    def  __init__(self):
+    def __init__(self):
         super().__init__()
         self.initializeUI()
 
-    def initializeUI(self):#задача базовых настроек приложения
-        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+    def initializeUI(self):  # задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600)  # 600, 200 - отступ при создании, 800, 600 - размер окна
         self.setWindowTitle("регистрация")
         self.setUpLog_Window()
         self.show()
@@ -58,11 +61,14 @@ class Log_Window(QWidget):
         main_v_box.addWidget(self.log_button)
 
         self.setLayout(main_v_box)
+
     def addBD_goMain(self):
-        if len(self.input_logr.text()) > 0 and len(self.input_pasr.text()) > 0 and (self.input_pasr.text() == self.input_pasr2.text()):
+        if len(self.input_logr.text()) > 0 and len(self.input_pasr.text()) > 0 and (
+                self.input_pasr.text() == self.input_pasr2.text()):
             self.log_button.setEnabled(True)
-            #придумать как добавить введенные данные в бд
+            # придумать как добавить введенные данные в бд
             self.log_button.clicked.connect(self.goto_ScreenFirst)
+            return self.input_logr, self.input_pasr
         else:
             self.log_button.setEnabled(False)
 
@@ -77,13 +83,13 @@ class First_Window(QWidget):
 
         self.initializeUI()
 
-    def initializeUI(self):#задача базовых настроек приложения
-        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+    def initializeUI(self):  # задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600)  # 600, 200 - отступ при создании, 800, 600 - размер окна
         self.setWindowTitle("заголовок окна")
         self.setUpFirst_Window()
         self.show()
 
-    def setUpFirst_Window(self):#расположение элементов на окне
+    def setUpFirst_Window(self):  # расположение элементов на окне
         main_v_box = QVBoxLayout()
         head_text = QLabel("авторизация", self)
         head_text.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -111,8 +117,8 @@ class First_Window(QWidget):
 
         self.setLayout(main_v_box)
 
-    def checkCode(self):#работа кнопки вход
-        if len(self.input_log.text()) > 0 and len(self.input_pas.text()) > 0:#надо сравнить с данными из бд
+    def checkCode(self):  # работа кнопки вход
+        if len(self.input_log.text()) > 0 and len(self.input_pas.text()) > 0:  # надо сравнить с данными из бд
             self.ot_button.setEnabled(True)
             self.ot_button.clicked.connect(self.gotoScreen_Main)
         else:
@@ -121,10 +127,13 @@ class First_Window(QWidget):
     def gotoScreen_log(self):
         self.screen_log = Log_Window()
         self.screen_log.show()
+
     def gotoScreen_Main(self):
         self.screen_main = Main_Window()
         self.screen_main.show()
 
-app = QApplication(sys.argv)
-window = First_Window()
-sys.exit(app.exec()) #открытие приложения
+def run():
+    app = QApplication(sys.argv)
+    window = Log_Window()
+    login, password = window.addBD_goMain()
+    sys.exit(app.exec())  # открытие приложения

@@ -3,6 +3,8 @@ import os
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 from datetime import datetime
+from app import Main_Window, First_Window, Log_Window
+from app import run
 import hashlib
 
 connect = sqlite3.connect('test.db')
@@ -33,10 +35,10 @@ def hash_password(password): # Функция для хеширования па
     return hashlib.sha256(password.encode()).hexdigest()
 
 
-def create_account():  # Функция для регистрации пользователей
-    user_name = input("Придумайте логин: ")
-    password = input(
-        "Придумайте пароль: ")  # здесь пользователь в приложение вводит свои данные для регистрации (user_name and password) для этого нужна отдельная функция
+def create_account():
+    print(0)# Функция для регистрации пользователей
+    user_name, password = input(), input()
+    print(user_name, password)
     all_users = cursor.execute("""SELECT NAME FROM USERS""")
     all_users = [str(x)[2:-3] for x in all_users]
     if user_name == '':
@@ -152,5 +154,5 @@ def upload_file_from_db():  # Здесь мы выгружаем из db ссы�
 # create_subject()
 # download_inf_file_in_db(k, subject_name, date_note)
 # print(upload_file_from_db())
-create_account()
+#create_account()
 connect.commit()
