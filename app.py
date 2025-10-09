@@ -18,10 +18,16 @@ class Log_Window(QWidget):
         main_v_box = QVBoxLayout()
         logr = QLabel("придумайте логин", self)
         self.input_logr = QLineEdit(self)
+        self.input_logr.textEdited.connect(self.addBD_goMain)
         pasr = QLabel("придумайте пароль", self)
         self.input_pasr = QLineEdit(self)
+        self.input_pasr.textEdited.connect(self.addBD_goMain)
         pasr2 = QLabel("повторите пароль")
         self.input_pasr2 = QLineEdit(self)
+        self.input_pasr2.textEdited.connect(self.addBD_goMain)
+        self.log_button = QPushButton("зарегистрироваться", self)
+        self.log_button.clicked.connect(self.addBD_goMain)
+        self.log_button.setEnabled(False)
 
         logr_h_box = QHBoxLayout()
         pasr_h_box = QHBoxLayout()
@@ -35,17 +41,26 @@ class Log_Window(QWidget):
         main_v_box.addLayout(logr_h_box)
         main_v_box.addLayout(pasr_h_box)
         main_v_box.addLayout(pasr2_h_box)
-        
+        main_v_box.addWidget(self.log_button)
 
         self.setLayout(main_v_box)
+    def addBD_goMain(self):
+        if len(self.input_logr.text()) > 0 and len(self.input_pasr.text()) > 0 and (self.input_pasr.text() == self.input_pasr2.text()):
+            self.log_button.setEnabled(True)
+            #придумать как добавить введенные данные в бд
+            self.log_button.clicked.connect(self.goto_ScreenFirst)
+        else:
+            self.log_button.setEnabled(False)
+
+    def goto_ScreenFirst(self):
+        self.screen_log = First_Window()
+        self.screen_log.show()
 
 
 class First_Window(QWidget):
     def __init__(self):
         super().__init__()
-        self.screen_vhod = QWidget()
-        self.screen_kon = QWidget()
-        self.screen_log = QWidget()
+
         self.initializeUI()
 
     def initializeUI(self):#задача базовых настроек приложения
@@ -81,26 +96,20 @@ class First_Window(QWidget):
         main_v_box.addWidget(self.ot_button)
         main_v_box.addWidget(self.log_button)
 
-        self.stacked_layout = QStackedLayout()
-        self.stacked_layout.addWidget(self.screen_vhod)
-        self.stacked_layout.addWidget(self.screen_kon)
-        self.stacked_layout.addWidget(self.screen_log)
-
         self.setLayout(main_v_box)
 
     def checkCode(self):#работа кнопки вход
         if len(self.input_log.text()) > 0 and len(self.input_pas.text()) > 0:#надо сравнить с данными из бд
             self.ot_button.setEnabled(True)
-            self.ot_button.clicked.connect(self.gotoScreen_kon)
+            self.ot_button.clicked.connect(self.gotoScreen_Main)
         else:
             self.ot_button.setEnabled(False)
-    
-    def gotoScreen_kon(self):#переход на новую страницу
-        self.stacked_layout.setCurrentWidget(self.screen_kon)
 
     def gotoScreen_log(self):
         self.screen_log = Log_Window()
         self.screen_log.show()
+    def gotoScreen_Main(self):
+        pass
 
 app = QApplication(sys.argv)
 window = First_Window()
