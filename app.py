@@ -3,6 +3,20 @@ from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLa
 from PyQt6.QtGui import QPixmap #для картинок
 from PyQt6.QtCore import Qt
 
+class Main_Window(QWidget):
+    def  __init__(self):
+        super().__init__()
+        self.initializeUI()
+
+    def initializeUI(self):#задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setWindowTitle("главное окно")
+        self.setUpMain_Window()
+        self.show()
+
+    def setUpMain_Window(self):
+        pass
+
 class Log_Window(QWidget):
     def  __init__(self):
         super().__init__()
@@ -84,7 +98,6 @@ class First_Window(QWidget):
         self.log_button = QPushButton("зарегистрироваться", self)
         self.log_button.clicked.connect(self.gotoScreen_log)
 
-
         log_h_box = QHBoxLayout()
         pas_h_box = QHBoxLayout()
         log_h_box.addWidget(log)
@@ -109,7 +122,8 @@ class First_Window(QWidget):
         self.screen_log = Log_Window()
         self.screen_log.show()
     def gotoScreen_Main(self):
-        pass
+        self.screen_main = Main_Window()
+        self.screen_main.show()
 
 app = QApplication(sys.argv)
 window = First_Window()
