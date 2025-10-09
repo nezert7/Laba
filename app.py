@@ -18,10 +18,10 @@ class MainWindow(QWidget):
         
         log = QLabel("введите логин", self)
         self.input_log = QLineEdit(self)
-
+        self.input_log.textEdited.connect(self.checkCode)
         pas = QLabel("введите пароль", self)
         self.input_pas = QLineEdit(self)
-        
+        self.input_pas.textEdited.connect(self.checkCode)
         self.ot_button = QPushButton("войти", self)
         self.ot_button.setEnabled(False)
 
@@ -36,6 +36,12 @@ class MainWindow(QWidget):
         main_v_box.addWidget(self.ot_button)
 
         self.setLayout(main_v_box)
+
+    def checkCode(self):#работа кнопки вход
+        if len(self.input_log.text()) > 0 and len(self.input_pas.text()) > 0:#надо сравнить с данными из бд
+            self.ot_button.setEnabled(True)
+        else:
+            self.ot_button.setEnabled(False)
 
 app = QApplication(sys.argv)
 window = MainWindow()
