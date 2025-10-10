@@ -1,7 +1,110 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QBoxLayout, QTabWidget, QListWidget 
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QBoxLayout, QTabWidget, QListWidget, QFileDialog, QTextEdit, QMessageBox
 from PyQt6.QtGui import QPixmap #для картинок
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QFile, QIODevice, QTextStream
+
+class Gram_Window(QWidget):#окно с конспектами по цг
+    def  __init__(self):
+        super().__init__()
+        self.initializeUI()
+
+    def initializeUI(self):#задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setWindowTitle("лекции по цг")
+        self.setUpGram_Window()
+        self.show()
+
+    def setUpGram_Window(self):
+        pass
+
+class Tp_Window(QWidget):#окно с конспектами по тп
+    def  __init__(self):
+        super().__init__()
+        self.initializeUI()
+
+    def initializeUI(self):#задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setWindowTitle("лекции по тп")
+        self.setUpTp_Window()
+        self.show()
+
+    def setUpTp_Window(self):
+        pass
+
+class Proga_Window(QWidget):#окно с конспектами по проге
+    def  __init__(self):
+        super().__init__()
+        self.initializeUI()
+
+    def initializeUI(self):#задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setWindowTitle("лекции по проге")
+        self.setUpProga_Window()
+        self.show()
+
+    def setUpProga_Window(self):
+        pass
+
+class Discra_Window(QWidget):#окно с конспектами по дискре
+    def  __init__(self):
+        super().__init__()
+        self.initializeUI()
+
+    def initializeUI(self):#задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setWindowTitle("лекции по дискре")
+        self.setUpDiscra_Window()
+        self.show()
+
+    def setUpDiscra_Window(self):
+        pass
+
+class Linal_Window(QWidget):#окно с конспектами по линалу
+    def  __init__(self):
+        super().__init__()
+        self.initializeUI()
+
+    def initializeUI(self):#задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setWindowTitle("лекции по линалу")
+        self.setUpLinal_Window()
+        self.show()
+
+    def setUpLinal_Window(self):
+        pass
+
+class Matan_Window(QWidget):#окно с конспектами по матану
+    def  __init__(self):
+        super().__init__()
+        self.con1 = "C:/Users/l.sakharnova/Desktop/code/команды для лабы 1.txt"#путь к файлу
+        self.initializeUI()
+
+    def initializeUI(self):#задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setWindowTitle("лекции по матану")
+        self.setUpMatan_Window()
+        self.show()
+
+    def setUpMatan_Window(self):
+        con1 = QLabel("первый конспект", self)
+        con1_button = QPushButton("показать")
+        con1_button.clicked.connect(self.open_con1)
+
+        self.text_area = QTextEdit()
+        
+        con1_h_box = QHBoxLayout()
+        con1_h_box.addWidget(con1)
+        con1_h_box.addWidget(con1_button)
+        con1_h_box.addWidget(self.text_area)
+        self.setLayout(con1_h_box)
+
+    def open_con1(self):#функция открытия файла
+        file = QFile(self.con1)
+        if file.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
+            stream = QTextStream(file)
+            content = stream.readAll()
+            self.text_area.setText(content)
+            file.close()
 
 class Main_Window(QWidget):#окно с выбором предмета, основное окно приложения
     def  __init__(self):
@@ -16,40 +119,64 @@ class Main_Window(QWidget):#окно с выбором предмета, осн�
 
     def setUpMain_Window(self):
         main_v_box = QVBoxLayout()
+        sub_name = QLabel("предмет:", self)
 
-        self.vari = QTabWidget(self)#создание меню с предметами
-        mat = QListWidget()#список конспектов
-        mat.addItems(["конспект 1", "конспект 2", "конспект 3"])#список названий конспектов
-        self.vari.addTab(mat, "матан")#создание вкладки с названием предмета
-
-        linal = QListWidget()#список конспектов
-        linal.addItems(["конспект 1", "конспект 2", "конспект 3"])#список названий конспектов
-        self.vari.addTab(linal, "линал")#создание вкладки с названием предмета
-
-        discra = QListWidget()#список конспектов
-        discra.addItems(["конспект 1", "конспект 2", "конспект 3"])#список названий конспектов
-        self.vari.addTab(discra, "дискра")#создание вкладки с названием предмета
-
-        proga = QListWidget()#список конспектов
-        proga.addItems(["конспект 1", "конспект 2", "конспект 3"])#список названий конспектов
-        self.vari.addTab(proga, "прога")#создание вкладки с названием предмета
-
-        tp = QListWidget()#список конспектов
-        tp.addItems(["конспект 1", "конспект 2", "конспект 3"])#список названий конспектов
-        self.vari.addTab(tp, "тп")#создание вкладки с названием предмета
-
-        gram = QListWidget()#список конспектов
-        gram.addItems(["конспект 1", "конспект 2", "конспект 3"])#список названий конспектов
-        self.vari.addTab(gram, "цг")#создание вкладки с названием предмета
+        self.vari = QComboBox(self)
+        self.vari.addItems([" ", "матан", "линал", "дискра", "прога", "тп", "цг"])
+        self.ac_button = QPushButton("подтвердить", self)
+        self.ac_button.clicked.connect(self.show_current_selection)
         
         sub_h_box = QHBoxLayout()
+        sub_h_box.addWidget(sub_name)
+        sub_h_box.addWidget(self.vari)
         sub_h_box.addWidget(self.vari)
         sub_h_box.setAlignment(self.vari, Qt.AlignmentFlag.AlignTop)
+        sub_h_box.addWidget(self.ac_button)
         main_v_box.addLayout(sub_h_box)
 
         main_v_box.setAlignment(sub_h_box, Qt.AlignmentFlag.AlignTop)
 
         self.setLayout(main_v_box)
+    def show_current_selection(self):
+        current_text = self.vari.currentText()
+        current_index = self.vari.currentIndex()
+        #self.selection_label.setText(f"Selected: {current_text} (Index: {current_index})")
+        if current_text == "матан":
+            self.ac_button.clicked.connect(self.goto_ScreenMatan)
+        elif current_text == "линал":
+            self.ac_button.clicked.connect(self.goto_ScreenLinal)
+        elif current_text == "дискра":
+            self.ac_button.clicked.connect(self.goto_ScreenDiscra)
+        elif current_text == "прога":
+            self.ac_button.clicked.connect(self.goto_ScreenProga)
+        elif current_text == "тп":
+            self.ac_button.clicked.connect(self.goto_ScreenTp)
+        else:
+            self.ac_button.clicked.connect(self.goto_ScreenGram)
+    
+    def goto_ScreenMatan(self):
+        self.screen_main = Matan_Window()
+        self.screen_main.show()
+
+    def goto_ScreenLinal(self):
+        self.screen_main = Linal_Window()
+        self.screen_main.show()
+    
+    def goto_ScreenDiscra(self):
+        self.screen_main = Discra_Window()
+        self.screen_main.show()
+    
+    def goto_ScreenProga(self):
+        self.screen_main = Proga_Window()
+        self.screen_main.show()
+    
+    def goto_ScreenTp(self):
+        self.screen_main = Tp_Window()
+        self.screen_main.show()
+    
+    def goto_ScreenGram(self):
+        self.screen_main = Gram_Window()
+        self.screen_main.show()
 
 class Log_Window(QWidget):#окно регистрации
     def  __init__(self):
@@ -158,7 +285,6 @@ class First_Window(QWidget):#окно открытия приложения, в�
         self.hide()
         self.screen_log = Log_Window()
         self.screen_log.show()
-
     def gotoScreen_Main(self):#переход на основное окно с конспектами
         self.hide()
         self.screen_main = Main_Window()
