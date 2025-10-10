@@ -1,9 +1,9 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QStackedLayout, QComboBox, QBoxLayout
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QBoxLayout, QTabWidget
 from PyQt6.QtGui import QPixmap #для картинок
 from PyQt6.QtCore import Qt
 
-class Gram_Window(QWidget):
+class Gram_Window(QWidget):#окно с конспектами по цг
     def  __init__(self):
         super().__init__()
         self.initializeUI()
@@ -17,7 +17,7 @@ class Gram_Window(QWidget):
     def setUpGram_Window(self):
         pass
 
-class Tp_Window(QWidget):
+class Tp_Window(QWidget):#окно с конспектами по тп
     def  __init__(self):
         super().__init__()
         self.initializeUI()
@@ -31,7 +31,7 @@ class Tp_Window(QWidget):
     def setUpTp_Window(self):
         pass
 
-class Proga_Window(QWidget):
+class Proga_Window(QWidget):#окно с конспектами по проге
     def  __init__(self):
         super().__init__()
         self.initializeUI()
@@ -45,7 +45,7 @@ class Proga_Window(QWidget):
     def setUpProga_Window(self):
         pass
 
-class Discra_Window(QWidget):
+class Discra_Window(QWidget):#окно с конспектами по дискре
     def  __init__(self):
         super().__init__()
         self.initializeUI()
@@ -59,7 +59,7 @@ class Discra_Window(QWidget):
     def setUpDiscra_Window(self):
         pass
 
-class Linal_Window(QWidget):
+class Linal_Window(QWidget):#окно с конспектами по линалу
     def  __init__(self):
         super().__init__()
         self.initializeUI()
@@ -73,7 +73,7 @@ class Linal_Window(QWidget):
     def setUpLinal_Window(self):
         pass
 
-class Matan_Window(QWidget):
+class Matan_Window(QWidget):#окно с конспектами по матану
     def  __init__(self):
         super().__init__()
         self.initializeUI()
@@ -85,9 +85,11 @@ class Matan_Window(QWidget):
         self.show()
 
     def setUpMatan_Window(self):
+        #fil = QFileDialog(self)#открывает проводник
+        #fil.exec()
         pass
 
-class Main_Window(QWidget):
+class Main_Window(QWidget):#окно с выбором предмета, основное окно приложения
     def  __init__(self):
         super().__init__()
         self.initializeUI()
@@ -100,64 +102,69 @@ class Main_Window(QWidget):
 
     def setUpMain_Window(self):
         main_v_box = QVBoxLayout()
-        sub_name = QLabel("предмет:", self)
-        self.vari = QComboBox(self)
-        self.vari.addItems([" ", "матан", "линал", "дискра", "прога", "тп", "цг"])
-        self.ac_button = QPushButton("подтвердить", self)
-        self.ac_button.clicked.connect(self.show_current_selection)
+        self.vari = QTabWidget(self)#создание меню с предметами
+        mat = QLabel("матан", self)
+        self.vari.addTab(mat, "матан")
+        linal = QLabel("линал", self)
+        self.vari.addTab(linal, "линал")
+        discra = QLabel("дискра", self)
+        self.vari.addTab(discra, "дискра")
+        proga = QLabel("прога", self)
+        self.vari.addTab(proga, "прога")
+        tp = QLabel("тп", self)
+        self.vari.addTab(tp, "тп")
+        gram = QLabel("цг", self)
+        self.vari.addTab(gram, "цг")
         
         sub_h_box = QHBoxLayout()
-        sub_h_box.addWidget(sub_name)
         sub_h_box.addWidget(self.vari)
         sub_h_box.setAlignment(self.vari, Qt.AlignmentFlag.AlignTop)
-        sub_h_box.addWidget(self.ac_button)
         main_v_box.addLayout(sub_h_box)
 
         main_v_box.setAlignment(sub_h_box, Qt.AlignmentFlag.AlignTop)
 
         self.setLayout(main_v_box)
-    def show_current_selection(self):
+    def show_current_selection(self):#работа кнопки "подтвердить"
         current_text = self.vari.currentText()
         current_index = self.vari.currentIndex()
-        #self.selection_label.setText(f"Selected: {current_text} (Index: {current_index})")
         if current_text == "матан":
-            self.ac_button.clicked.connect(self.goto_ScreenMatan)
-        elif current_text == "линал":
-            self.ac_button.clicked.connect(self.goto_ScreenLinal)
-        elif current_text == "дискра":
-            self.ac_button.clicked.connect(self.goto_ScreenDiscra)
-        elif current_text == "прога":
-            self.ac_button.clicked.connect(self.goto_ScreenProga)
-        elif current_text == "тп":
-            self.ac_button.clicked.connect(self.goto_ScreenTp)
-        else:
-            self.ac_button.clicked.connect(self.goto_ScreenGram)
+            self.ac_button.clicked.connect(self.goto_ScreenMatan)#работа кнопки "подтвердить" на переход на окно с конспектами по матану
+        if current_text == "линал":
+            self.ac_button.clicked.connect(self.goto_ScreenLinal)#работа кнопки "подтвердить" на переход на окно с конспектами по линалу
+        if current_text == "дискра":
+            self.ac_button.clicked.connect(self.goto_ScreenDiscra)#работа кнопки "подтвердить" на переход на окно с конспектами по дискре
+        if current_text == "прога":
+            self.ac_button.clicked.connect(self.goto_ScreenProga)#работа кнопки "подтвердить" на переход на окно с конспектами по проге
+        if current_text == "тп":
+            self.ac_button.clicked.connect(self.goto_ScreenTp)#работа кнопки "подтвердить" на переход на окно с конспектами по тп
+        if current_text == "цг":
+            self.ac_button.clicked.connect(self.goto_ScreenGram)#работа кнопки "подтвердить" на переход на окно с конспектами по цг
     
-    def goto_ScreenMatan(self):
+    def goto_ScreenMatan(self):#переход на окно с конспектами по матану
         self.screen_main = Matan_Window()
         self.screen_main.show()
 
-    def goto_ScreenLinal(self):
+    def goto_ScreenLinal(self):#переход на окно с конспектами по линалу
         self.screen_main = Linal_Window()
         self.screen_main.show()
     
-    def goto_ScreenDiscra(self):
+    def goto_ScreenDiscra(self):#переход на окно с конспектами по дискре
         self.screen_main = Discra_Window()
         self.screen_main.show()
     
-    def goto_ScreenProga(self):
+    def goto_ScreenProga(self):#ереход на окно с конспектами по проге
         self.screen_main = Proga_Window()
         self.screen_main.show()
     
-    def goto_ScreenTp(self):
+    def goto_ScreenTp(self):#переход на окно с конспектами по тп
         self.screen_main = Tp_Window()
         self.screen_main.show()
     
-    def goto_ScreenGram(self):
+    def goto_ScreenGram(self):#переход на окно с конспектами по цг
         self.screen_main = Gram_Window()
         self.screen_main.show()
 
-class Log_Window(QWidget):
+class Log_Window(QWidget):#окно регистрации
     def  __init__(self):
         super().__init__()
         self.initializeUI()
@@ -198,7 +205,7 @@ class Log_Window(QWidget):
         main_v_box.addWidget(self.log_button)
 
         self.setLayout(main_v_box)
-    def addBD_goMain(self):
+    def addBD_goMain(self):#сохранение введеного логина и пароля
         if len(self.input_logr.text()) > 0 and len(self.input_pasr.text()) > 0 and (self.input_pasr.text() == self.input_pasr2.text()):
             self.log_button.setEnabled(True)
             #придумать как добавить введенные данные в бд
@@ -206,12 +213,12 @@ class Log_Window(QWidget):
         else:
             self.log_button.setEnabled(False)
 
-    def goto_ScreenFirst(self):
+    def goto_ScreenFirst(self):#переход на окно входа
         self.screen_log = First_Window()
         self.screen_log.show()
 
 
-class First_Window(QWidget):
+class First_Window(QWidget):#окно открытия приложения, вход 
     def __init__(self):
         super().__init__()
 
@@ -235,6 +242,7 @@ class First_Window(QWidget):
         self.input_pas.textEdited.connect(self.checkCode)
         self.ot_button = QPushButton("войти", self)
         self.ot_button.setEnabled(False)
+        #self.ot_button.QShortcut(QKeySequence('Ctrl+O'), self)
         self.log_button = QPushButton("зарегистрироваться", self)
         self.log_button.clicked.connect(self.gotoScreen_log)
 
@@ -258,10 +266,10 @@ class First_Window(QWidget):
         else:
             self.ot_button.setEnabled(False)
 
-    def gotoScreen_log(self):
+    def gotoScreen_log(self):#переход на окно регистрации
         self.screen_log = Log_Window()
         self.screen_log.show()
-    def gotoScreen_Main(self):
+    def gotoScreen_Main(self):#переход на основное окно с конспектами
         self.screen_main = Main_Window()
         self.screen_main.show()
 
