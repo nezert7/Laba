@@ -34,6 +34,8 @@ class Tp_Window(QWidget):#окно с конспектами по тп
 class Proga_Window(QWidget):#окно с конспектами по проге
     def  __init__(self):
         super().__init__()
+        self.con1 = "C:/Users/l.sakharnova/Desktop/code/команды для лабы 1.txt"#путь к файлу #обязательно именно такая / палка
+        self.con2 = "C:/Users/l.sakharnova/Desktop/code/PyQt6.txt"
         self.initializeUI()
 
     def initializeUI(self):#задача базовых настроек приложения
@@ -43,7 +45,54 @@ class Proga_Window(QWidget):#окно с конспектами по проге
         self.show()
 
     def setUpProga_Window(self):
-        pass
+        con_box = QVBoxLayout()
+        con1 = QLabel("первый конспект", self)#создание текста и кнопки для первого конспекта #вместо "первый конспект" можно название темы написать
+        con1_button = QPushButton("показать")
+        con1_button.clicked.connect(self.open_con1)
+
+        con1_h_box = QHBoxLayout()
+        con1_h_box.addWidget(con1)
+        con1_h_box.addWidget(con1_button)
+        con_box.addLayout(con1_h_box)
+
+        con2 = QLabel("второй конспект", self)
+        con2_button = QPushButton("показать")
+        con2_button.clicked.connect(self.open_con2)
+
+        con2_h_box = QHBoxLayout()
+        con2_h_box.addWidget(con2)
+        con2_h_box.addWidget(con2_button)   
+        con_box.addLayout(con2_h_box)     
+
+        self.text_area = QTextEdit()#пустое поле, в котором потом показывается содержимое файла
+        con_box.addWidget(self.text_area)
+
+        self.exit_button = QPushButton("назад", self)
+        self.exit_button.clicked.connect(self.goto_MainWindow)
+        con_box.addWidget(self.exit_button)
+
+        self.setLayout(con_box)
+
+    def open_con1(self):#функция открытия файла
+        с1 = QFile(self.con1)
+        if с1.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
+            stream = QTextStream(с1)
+            content = stream.readAll()
+            self.text_area.setText(content)
+            с1.close()
+
+    def open_con2(self):#функция открытия файла
+        с2 = QFile(self.con2)
+        if с2.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text):
+            stream = QTextStream(с2)
+            content = stream.readAll()
+            self.text_area.setText(content)
+            с2.close()
+
+    def goto_MainWindow(self):#функция перехода на главное окно
+        self.hide()
+        self.screen_main = Main_Window()
+        self.screen_main.show()
 
 class Discra_Window(QWidget):#окно с конспектами по дискре
     def  __init__(self):
