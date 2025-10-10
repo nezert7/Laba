@@ -1,7 +1,91 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QStackedLayout, QComboBox
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QStackedLayout, QComboBox, QBoxLayout
 from PyQt6.QtGui import QPixmap #для картинок
 from PyQt6.QtCore import Qt
+
+class Gram_Window(QWidget):
+    def  __init__(self):
+        super().__init__()
+        self.initializeUI()
+
+    def initializeUI(self):#задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setWindowTitle("лекции по цг")
+        self.setUpGram_Window()
+        self.show()
+
+    def setUpGram_Window(self):
+        pass
+
+class Tp_Window(QWidget):
+    def  __init__(self):
+        super().__init__()
+        self.initializeUI()
+
+    def initializeUI(self):#задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setWindowTitle("лекции по тп")
+        self.setUpTp_Window()
+        self.show()
+
+    def setUpTp_Window(self):
+        pass
+
+class Proga_Window(QWidget):
+    def  __init__(self):
+        super().__init__()
+        self.initializeUI()
+
+    def initializeUI(self):#задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setWindowTitle("лекции по проге")
+        self.setUpProga_Window()
+        self.show()
+
+    def setUpProga_Window(self):
+        pass
+
+class Discra_Window(QWidget):
+    def  __init__(self):
+        super().__init__()
+        self.initializeUI()
+
+    def initializeUI(self):#задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setWindowTitle("лекции по дискре")
+        self.setUpDiscra_Window()
+        self.show()
+
+    def setUpDiscra_Window(self):
+        pass
+
+class Linal_Window(QWidget):
+    def  __init__(self):
+        super().__init__()
+        self.initializeUI()
+
+    def initializeUI(self):#задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setWindowTitle("лекции по линалу")
+        self.setUpLinal_Window()
+        self.show()
+
+    def setUpLinal_Window(self):
+        pass
+
+class Matan_Window(QWidget):
+    def  __init__(self):
+        super().__init__()
+        self.initializeUI()
+
+    def initializeUI(self):#задача базовых настроек приложения
+        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setWindowTitle("лекции по матану")
+        self.setUpMatan_Window()
+        self.show()
+
+    def setUpMatan_Window(self):
+        pass
 
 class Main_Window(QWidget):
     def  __init__(self):
@@ -17,15 +101,61 @@ class Main_Window(QWidget):
     def setUpMain_Window(self):
         main_v_box = QVBoxLayout()
         sub_name = QLabel("предмет:", self)
-        vari = QComboBox(self)
-        vari.addItems([" ", "матан", "линал", "дискра", "прога", "тп", "цг"])
-
+        self.vari = QComboBox(self)
+        self.vari.addItems([" ", "матан", "линал", "дискра", "прога", "тп", "цг"])
+        self.ac_button = QPushButton("подтвердить", self)
+        self.ac_button.clicked.connect(self.show_current_selection)
+        
         sub_h_box = QHBoxLayout()
         sub_h_box.addWidget(sub_name)
-        sub_h_box.addWidget(vari)
+        sub_h_box.addWidget(self.vari)
+        sub_h_box.setAlignment(self.vari, Qt.AlignmentFlag.AlignTop)
+        sub_h_box.addWidget(self.ac_button)
         main_v_box.addLayout(sub_h_box)
 
+        main_v_box.setAlignment(sub_h_box, Qt.AlignmentFlag.AlignTop)
+
         self.setLayout(main_v_box)
+    def show_current_selection(self):
+        current_text = self.vari.currentText()
+        current_index = self.vari.currentIndex()
+        #self.selection_label.setText(f"Selected: {current_text} (Index: {current_index})")
+        if current_text == "матан":
+            self.ac_button.clicked.connect(self.goto_ScreenMatan)
+        elif current_text == "линал":
+            self.ac_button.clicked.connect(self.goto_ScreenLinal)
+        elif current_text == "дискра":
+            self.ac_button.clicked.connect(self.goto_ScreenDiscra)
+        elif current_text == "прога":
+            self.ac_button.clicked.connect(self.goto_ScreenProga)
+        elif current_text == "тп":
+            self.ac_button.clicked.connect(self.goto_ScreenTp)
+        else:
+            self.ac_button.clicked.connect(self.goto_ScreenGram)
+    
+    def goto_ScreenMatan(self):
+        self.screen_main = Matan_Window()
+        self.screen_main.show()
+
+    def goto_ScreenLinal(self):
+        self.screen_main = Linal_Window()
+        self.screen_main.show()
+    
+    def goto_ScreenDiscra(self):
+        self.screen_main = Discra_Window()
+        self.screen_main.show()
+    
+    def goto_ScreenProga(self):
+        self.screen_main = Proga_Window()
+        self.screen_main.show()
+    
+    def goto_ScreenTp(self):
+        self.screen_main = Tp_Window()
+        self.screen_main.show()
+    
+    def goto_ScreenGram(self):
+        self.screen_main = Gram_Window()
+        self.screen_main.show()
 
 class Log_Window(QWidget):
     def  __init__(self):
