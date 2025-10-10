@@ -101,6 +101,7 @@ class Log_Window(QWidget):#окно регистрации
             self.log_button.setEnabled(False)
 
     def goto_ScreenFirst(self):#переход на окно входа
+        self.hide()
         self.screen_log = First_Window()
         self.screen_log.show()
 
@@ -154,9 +155,12 @@ class First_Window(QWidget):#окно открытия приложения, в�
             self.ot_button.setEnabled(False)
 
     def gotoScreen_log(self):#переход на окно регистрации
+        self.hide()
         self.screen_log = Log_Window()
         self.screen_log.show()
+
     def gotoScreen_Main(self):#переход на основное окно с конспектами
+        self.hide()
         self.screen_main = Main_Window()
         self.screen_main.show()
 
