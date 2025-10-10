@@ -1,5 +1,5 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QBoxLayout, QTabWidget
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QBoxLayout, QTabWidget, QListWidget 
 from PyQt6.QtGui import QPixmap #для картинок
 from PyQt6.QtCore import Qt
 
@@ -102,19 +102,31 @@ class Main_Window(QWidget):#окно с выбором предмета, осн�
 
     def setUpMain_Window(self):
         main_v_box = QVBoxLayout()
+
         self.vari = QTabWidget(self)#создание меню с предметами
-        mat = QLabel("матан", self)
-        self.vari.addTab(mat, "матан")
-        linal = QLabel("линал", self)
-        self.vari.addTab(linal, "линал")
-        discra = QLabel("дискра", self)
-        self.vari.addTab(discra, "дискра")
-        proga = QLabel("прога", self)
-        self.vari.addTab(proga, "прога")
-        tp = QLabel("тп", self)
-        self.vari.addTab(tp, "тп")
-        gram = QLabel("цг", self)
-        self.vari.addTab(gram, "цг")
+        mat = QListWidget()#список конспектов
+        mat.addItems(["конспект 1", "конспект 2", "конспект 3"])#список названий конспектов
+        self.vari.addTab(mat, "матан")#создание вкладки с названием предмета
+
+        linal = QListWidget()#список конспектов
+        linal.addItems(["конспект 1", "конспект 2", "конспект 3"])#список названий конспектов
+        self.vari.addTab(linal, "линал")#создание вкладки с названием предмета
+
+        discra = QListWidget()#список конспектов
+        discra.addItems(["конспект 1", "конспект 2", "конспект 3"])#список названий конспектов
+        self.vari.addTab(discra, "дискра")#создание вкладки с названием предмета
+
+        proga = QListWidget()#список конспектов
+        proga.addItems(["конспект 1", "конспект 2", "конспект 3"])#список названий конспектов
+        self.vari.addTab(proga, "прога")#создание вкладки с названием предмета
+
+        tp = QListWidget()#список конспектов
+        tp.addItems(["конспект 1", "конспект 2", "конспект 3"])#список названий конспектов
+        self.vari.addTab(tp, "тп")#создание вкладки с названием предмета
+
+        gram = QListWidget()#список конспектов
+        gram.addItems(["конспект 1", "конспект 2", "конспект 3"])#список названий конспектов
+        self.vari.addTab(gram, "цг")#создание вкладки с названием предмета
         
         sub_h_box = QHBoxLayout()
         sub_h_box.addWidget(self.vari)
