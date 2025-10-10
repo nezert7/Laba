@@ -3,92 +3,6 @@ from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLa
 from PyQt6.QtGui import QPixmap #для картинок
 from PyQt6.QtCore import Qt
 
-class Gram_Window(QWidget):#окно с конспектами по цг
-    def  __init__(self):
-        super().__init__()
-        self.initializeUI()
-
-    def initializeUI(self):#задача базовых настроек приложения
-        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
-        self.setWindowTitle("лекции по цг")
-        self.setUpGram_Window()
-        self.show()
-
-    def setUpGram_Window(self):
-        pass
-
-class Tp_Window(QWidget):#окно с конспектами по тп
-    def  __init__(self):
-        super().__init__()
-        self.initializeUI()
-
-    def initializeUI(self):#задача базовых настроек приложения
-        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
-        self.setWindowTitle("лекции по тп")
-        self.setUpTp_Window()
-        self.show()
-
-    def setUpTp_Window(self):
-        pass
-
-class Proga_Window(QWidget):#окно с конспектами по проге
-    def  __init__(self):
-        super().__init__()
-        self.initializeUI()
-
-    def initializeUI(self):#задача базовых настроек приложения
-        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
-        self.setWindowTitle("лекции по проге")
-        self.setUpProga_Window()
-        self.show()
-
-    def setUpProga_Window(self):
-        pass
-
-class Discra_Window(QWidget):#окно с конспектами по дискре
-    def  __init__(self):
-        super().__init__()
-        self.initializeUI()
-
-    def initializeUI(self):#задача базовых настроек приложения
-        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
-        self.setWindowTitle("лекции по дискре")
-        self.setUpDiscra_Window()
-        self.show()
-
-    def setUpDiscra_Window(self):
-        pass
-
-class Linal_Window(QWidget):#окно с конспектами по линалу
-    def  __init__(self):
-        super().__init__()
-        self.initializeUI()
-
-    def initializeUI(self):#задача базовых настроек приложения
-        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
-        self.setWindowTitle("лекции по линалу")
-        self.setUpLinal_Window()
-        self.show()
-
-    def setUpLinal_Window(self):
-        pass
-
-class Matan_Window(QWidget):#окно с конспектами по матану
-    def  __init__(self):
-        super().__init__()
-        self.initializeUI()
-
-    def initializeUI(self):#задача базовых настроек приложения
-        self.setGeometry(600, 200, 800, 600) #600, 200 - отступ при создании, 800, 600 - размер окна
-        self.setWindowTitle("лекции по матану")
-        self.setUpMatan_Window()
-        self.show()
-
-    def setUpMatan_Window(self):
-        #fil = QFileDialog(self)#открывает проводник
-        #fil.exec()
-        pass
-
 class Main_Window(QWidget):#окно с выбором предмета, основное окно приложения
     def  __init__(self):
         super().__init__()
@@ -136,45 +50,6 @@ class Main_Window(QWidget):#окно с выбором предмета, осн�
         main_v_box.setAlignment(sub_h_box, Qt.AlignmentFlag.AlignTop)
 
         self.setLayout(main_v_box)
-    def show_current_selection(self):#работа кнопки "подтвердить"
-        current_text = self.vari.currentText()
-        current_index = self.vari.currentIndex()
-        if current_text == "матан":
-            self.ac_button.clicked.connect(self.goto_ScreenMatan)#работа кнопки "подтвердить" на переход на окно с конспектами по матану
-        if current_text == "линал":
-            self.ac_button.clicked.connect(self.goto_ScreenLinal)#работа кнопки "подтвердить" на переход на окно с конспектами по линалу
-        if current_text == "дискра":
-            self.ac_button.clicked.connect(self.goto_ScreenDiscra)#работа кнопки "подтвердить" на переход на окно с конспектами по дискре
-        if current_text == "прога":
-            self.ac_button.clicked.connect(self.goto_ScreenProga)#работа кнопки "подтвердить" на переход на окно с конспектами по проге
-        if current_text == "тп":
-            self.ac_button.clicked.connect(self.goto_ScreenTp)#работа кнопки "подтвердить" на переход на окно с конспектами по тп
-        if current_text == "цг":
-            self.ac_button.clicked.connect(self.goto_ScreenGram)#работа кнопки "подтвердить" на переход на окно с конспектами по цг
-    
-    def goto_ScreenMatan(self):#переход на окно с конспектами по матану
-        self.screen_main = Matan_Window()
-        self.screen_main.show()
-
-    def goto_ScreenLinal(self):#переход на окно с конспектами по линалу
-        self.screen_main = Linal_Window()
-        self.screen_main.show()
-    
-    def goto_ScreenDiscra(self):#переход на окно с конспектами по дискре
-        self.screen_main = Discra_Window()
-        self.screen_main.show()
-    
-    def goto_ScreenProga(self):#ереход на окно с конспектами по проге
-        self.screen_main = Proga_Window()
-        self.screen_main.show()
-    
-    def goto_ScreenTp(self):#переход на окно с конспектами по тп
-        self.screen_main = Tp_Window()
-        self.screen_main.show()
-    
-    def goto_ScreenGram(self):#переход на окно с конспектами по цг
-        self.screen_main = Gram_Window()
-        self.screen_main.show()
 
 class Log_Window(QWidget):#окно регистрации
     def  __init__(self):
