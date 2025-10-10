@@ -484,6 +484,8 @@ class Log_Window(QWidget):#окно регистрации
         self.log_button = QPushButton("зарегистрироваться", self)
         self.log_button.clicked.connect(self.addBD_goMain)
         self.log_button.setEnabled(False)
+        self.exit_button = QPushButton("назад", self)
+        self.exit_button.clicked.connect(self.goto_MainWindow)
 
         logr_h_box = QHBoxLayout()
         pasr_h_box = QHBoxLayout()
@@ -498,6 +500,7 @@ class Log_Window(QWidget):#окно регистрации
         main_v_box.addLayout(pasr_h_box)
         main_v_box.addLayout(pasr2_h_box)
         main_v_box.addWidget(self.log_button)
+        main_v_box.addWidget(self.exit_button)
 
         self.setLayout(main_v_box)
     def addBD_goMain(self):#сохранение введеного логина и пароля
@@ -512,6 +515,11 @@ class Log_Window(QWidget):#окно регистрации
         self.hide()
         self.screen_log = First_Window()
         self.screen_log.show()
+    
+    def goto_MainWindow(self):#функция перехода на главное окно
+        self.hide()
+        self.screen_first = First_Window()
+        self.screen_first.show()
 
 
 class First_Window(QWidget):#окно открытия приложения, вход 
