@@ -2,6 +2,7 @@ import sys
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QBoxLayout, QTabWidget, QListWidget, QFileDialog, QTextEdit, QMessageBox
 from PyQt6.QtGui import QPixmap #для картинок
 from PyQt6.QtCore import Qt, QFile, QIODevice, QTextStream
+from main import create_account, login_system
 
 class Gram_Window(QWidget):#окно с конспектами по цг
     def  __init__(self):
@@ -510,10 +511,10 @@ class Log_Window(QWidget):#окно регистрации
         
         if not username or not password or not password_confirm:
             return False, "Все поля должны быть заполнены"
-        
-        if password != password_confirm:
+        elif password != password_confirm:
             return False, "Пароли не совпадают"
-        
+        elif not create_account(username, password):
+            return False, "Такой пользователь уже существует"
         return True, ""
 
     def get_input_data(self):#Возвращает текст из всех полей ввода
@@ -590,10 +591,11 @@ class First_Window(QWidget):#окно открытия приложения, в�
     def validate_login_data(self):#Проверяет валидность данных для авторизации
         username = self.input_log.text().strip()
         password = self.input_pas.text().strip()
-        
+        check, id = login_system(username, password)
         if not username or not password:
             return False, "Заполните все поля"
-        
+        elif not check:
+            return False, "Неверный логин или пароль"
         return True, ""
 
     def process_login(self):#Обрабатывает нажатие кнопки входа
@@ -621,6 +623,10 @@ class First_Window(QWidget):#окно открытия приложения, в�
         self.screen_main = Main_Window()
         self.screen_main.show()
 
-app = QApplication(sys.argv)
-window = First_Window()
-sys.exit(app.exec()) #открытие приложения
+def run():
+    app = QApplication(sys.argv)
+    window = First_Window()
+    sys.exit(app.exec()) #открытие приложения
+
+
+run()

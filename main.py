@@ -3,8 +3,6 @@ import os
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 from datetime import datetime
-from app import Main_Window, First_Window, Log_Window
-from app import run
 import hashlib
 
 connect = sqlite3.connect('test.db')
@@ -35,9 +33,14 @@ def hash_password(password): # Функция для хеширования па
     return hashlib.sha256(password.encode()).hexdigest()
 
 
-def create_account():
-    ss = run()
-    user_name, password = ss[0], ss[1]
+def create_account(user_name, password):
+    connect = sqlite3.connect('test.db')
+    cursor = connect.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS USERS( 
+                                                ID_USERS INTEGER PRIMARY KEY AUTOINCREMENT,     
+                                                NAME TEXT UNIQUE,
+                                                PASSWORD VARCHAR(15)
+                                            )""")
     all_users = cursor.execute("""SELECT NAME FROM USERS""")
     all_users = [str(x)[2:-3] for x in all_users]
     if user_name == '':
@@ -48,14 +51,20 @@ def create_account():
         password = hash_password(password)
         cursor.execute("""INSERT INTO USERS(NAME, PASSWORD)
                                 VALUES(?, ?)""", (user_name, password))
-        return login_system()  # Регистрация пройдена успешно
+        connect.commit()
+        return True
     else:
         return 'Такой пользователь уже существует'  # здесь нужна функция, которая выведет подобную ошибку на экран
 
 
-def login_system():  # Функция для проверки логина и пароля под которыми входит пользователь
-    user_name = input("Введите логин: ")
-    input_password = input("Введите пароль: ")  # здесь пользователь в приложение вводит
+def login_system(user_name, input_password):  # Функция для проверки логина и пароля под которыми входит пользователь
+    connect = sqlite3.connect('test.db')
+    cursor = connect.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS USERS( 
+                                                    ID_USERS INTEGER PRIMARY KEY AUTOINCREMENT,     
+                                                    NAME TEXT UNIQUE,
+                                                    PASSWORD VARCHAR(15)
+                                                )""")
     input_password = hash_password(input_password)
     all_users_password = [x for x in cursor.execute("""SELECT NAME, PASSWORD FROM USERS""")]
     for user, password in all_users_password:
@@ -64,10 +73,10 @@ def login_system():  # Функция для проверки логина и п
                 id_user = \
                     [str(x)[1:-2] for x in cursor.execute(f"""SELECT ID_USERS FROM USERS WHERE NAME='{user_name}'""")][
                         0]
-                print("Вход выполнен успешно")
-                return int(
+                connect.commit()
+                return True, int(
                     id_user)  # разрешаем доступ, всё хорошо и возвращаем id пользователя под именем которого зашли
-    return 'Неверный логин или пароль'  # здесь нужна функция, которая выведет подобную ошибку на экран
+    return False, 0  # здесь нужна функция, которая выведет подобную ошибку на экран
 
 
 def upload_to_drive(file_path, folder_id):  # Функция загружает файл на мой гугл драйв
@@ -153,5 +162,5 @@ def upload_file_from_db():  # Здесь мы выгружаем из db ссы�
 # create_subject()
 # download_inf_file_in_db(k, subject_name, date_note)
 # print(upload_file_from_db())
-create_account()
+# create_account()
 connect.commit()
