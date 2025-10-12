@@ -474,16 +474,16 @@ class Log_Window(QWidget):#окно регистрации
         main_v_box = QVBoxLayout()
         logr = QLabel("придумайте логин", self)
         self.input_logr = QLineEdit(self)
-        self.input_logr.textEdited.connect(self.addBD_goMain)
+        
         pasr = QLabel("придумайте пароль", self)
         self.input_pasr = QLineEdit(self)
-        self.input_pasr.textEdited.connect(self.addBD_goMain)
+        
         pasr2 = QLabel("повторите пароль")
         self.input_pasr2 = QLineEdit(self)
-        self.input_pasr2.textEdited.connect(self.addBD_goMain)
+        
         self.log_button = QPushButton("зарегистрироваться", self)
-        self.log_button.clicked.connect(self.addBD_goMain)
-        self.log_button.setEnabled(False)
+        self.log_button.clicked.connect(self.process_registration)
+        
         self.exit_button = QPushButton("назад", self)
         self.exit_button.clicked.connect(self.goto_MainWindow)
 
@@ -503,13 +503,37 @@ class Log_Window(QWidget):#окно регистрации
         main_v_box.addWidget(self.exit_button)
 
         self.setLayout(main_v_box)
-    def addBD_goMain(self):#сохранение введеного логина и пароля
-        if len(self.input_logr.text()) > 0 and len(self.input_pasr.text()) > 0 and (self.input_pasr.text() == self.input_pasr2.text()):
-            self.log_button.setEnabled(True)
-            #придумать как добавить введенные данные в бд
-            self.log_button.clicked.connect(self.goto_ScreenFirst)
+    def validate_registration_data(self):#Проверяет валидность данных для регистрации
+        username = self.input_logr.text().strip()
+        password = self.input_pasr.text().strip()
+        password_confirm = self.input_pasr2.text().strip()
+        
+        if not username or not password or not password_confirm:
+            return False, "Все поля должны быть заполнены"
+        
+        if password != password_confirm:
+            return False, "Пароли не совпадают"
+        
+        return True, ""
+
+    def get_input_data(self):#Возвращает текст из всех полей ввода
+        return {
+            'username': self.input_logr.text().strip(),
+            'password': self.input_pasr.text().strip(),
+            'password_confirm': self.input_pasr2.text().strip()
+        }
+
+    def process_registration(self):#Обрабатывает нажатие кнопки регистрации
+        is_valid, message = self.validate_registration_data()
+        
+        if is_valid:
+            user_data = self.get_input_data()
+            #print(f"Данные для регистрации: {user_data}")#вывод в терминал для проверки
+            self.close()
+            self.goto_ScreenFirst()
         else:
-            self.log_button.setEnabled(False)
+            QMessageBox.warning(self, "Ошибка регистрации", message)
+
 
     def goto_ScreenFirst(self):#переход на окно входа
         self.hide()
