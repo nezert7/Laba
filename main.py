@@ -4,6 +4,7 @@ from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 from datetime import datetime
 import hashlib
+import gdown
 
 connect = sqlite3.connect('test.db')
 cursor = connect.cursor()
@@ -29,7 +30,7 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT(
                                         )""")
 
 
-def hash_password(password): # Функция для хеширования паролей
+def hash_password(password):  # Функция для хеширования паролей
     return hashlib.sha256(password.encode()).hexdigest()
 
 
@@ -55,6 +56,12 @@ def create_account(user_name, password):
         return True
     else:
         return 'Такой пользователь уже существует'  # здесь нужна функция, которая выведет подобную ошибку на экран
+
+
+def download_file():
+    url = upload_file_from_db()
+    output = 'myfile.txt'
+    gdown.download(url, output, quiet=False)
 
 
 def login_system(user_name, input_password):  # Функция для проверки логина и пароля под которыми входит пользователь
@@ -104,6 +111,16 @@ def date_now():  # Здесь забирается актуальное врем
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M")
     return dt_string
+
+
+def request_subject():
+    connect = sqlite3.connect('test.db')
+    cursor = connect.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
+                                                ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
+                                                NAME TEXT UNIQUE
+                                            )""")
+    return [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME FROM SUBJECT""")]
 
 
 def create_subject():  # Функция для добавления в db новый предметов
