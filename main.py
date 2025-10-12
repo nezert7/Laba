@@ -16,13 +16,13 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS(
                                             DATE_UPLOAD DATETIME,
                                             DATE_NOTE DATE,
                                             LINK TEXT,
-                                            NAME_FILE VARCHAR(15)
+                                            NAME_FILE TEXT
                                         )""")
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS USERS( 
                                             ID_USERS INTEGER PRIMARY KEY AUTOINCREMENT,     
                                             NAME TEXT UNIQUE,
-                                            PASSWORD VARCHAR(15)
+                                            PASSWORD TEXT
                                         )""")
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
@@ -41,7 +41,7 @@ def create_account(user_name, password):
     cursor.execute("""CREATE TABLE IF NOT EXISTS USERS( 
                                                 ID_USERS INTEGER PRIMARY KEY AUTOINCREMENT,     
                                                 NAME TEXT UNIQUE,
-                                                PASSWORD VARCHAR(15)
+                                                PASSWORD TEXT
                                             )""")
     all_users = cursor.execute("""SELECT NAME FROM USERS""")
     all_users = [str(x)[2:-3] for x in all_users]
@@ -56,7 +56,7 @@ def create_account(user_name, password):
         connect.commit()
         return True
     else:
-        return 'Такой пользователь уже существует'  # здесь нужна функция, которая выведет подобную ошибку на экран
+        return False
 
 
 def download_file_in_pc():
@@ -71,7 +71,7 @@ def login_system(user_name, input_password):  # Функция для прове
     cursor.execute("""CREATE TABLE IF NOT EXISTS USERS( 
                                                     ID_USERS INTEGER PRIMARY KEY AUTOINCREMENT,     
                                                     NAME TEXT UNIQUE,
-                                                    PASSWORD VARCHAR(15)
+                                                    PASSWORD TEXT
                                                 )""")
     input_password = hash_password(input_password)
     all_users_password = [x for x in cursor.execute("""SELECT NAME, PASSWORD FROM USERS""")]
@@ -114,7 +114,7 @@ def date_now():  # Здесь забирается актуальное врем
     return dt_string
 
 
-def request_subject():
+def all_name_subject():
     connect = sqlite3.connect('test.db')
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
@@ -132,7 +132,7 @@ def create_subject(new_subject):  # Функция для добавления �
         connect.commit()
 
 
-def choose_file(): # Открываем проводник
+def choose_file():  # Открываем проводник
     file_path = filedialog.askopenfilename()
     return file_path
 
@@ -144,6 +144,14 @@ def download_inf_file_in_db(id_user, subject_name,
     cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
                                                 ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
                                                 NAME TEXT UNIQUE
+                                            )""")
+    cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
+                                                ID_USER INT,
+                                                ID_SUBJECT INT,     
+                                                DATE_UPLOAD DATETIME,
+                                                DATE_NOTE DATE,
+                                                LINK TEXT,
+                                                NAME_FILE TEXT
                                             )""")
     all_subject = [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME FROM SUBJECT""")]
     if subject_name not in all_subject:
@@ -158,39 +166,71 @@ def download_inf_file_in_db(id_user, subject_name,
     connect.commit()
 
 
-def upload_file_from_db():  # Здесь мы выгружаем из db ссылку на файл который хотим открыть, присутствует сортировка по имени и дате
-    date_create_start = input()  # Дата от которой ищем, нужна отдельная функция для ввода
-    date_create_end = input()  # Дата до которой ищем, нужна отдельная функция для ввода
-    subject = input()  # Название предмета ссылку на конспект которого мы хотим получить, нужна отдельная функция для ввода
+def upload_file_from_db(subject,
+                        name):  # Здесь мы выгружаем из db ссылку на файл который хотим открыть, присутствует сортировка по имени и дате
+    # date_create_start = input()  # Дата от которой ищем, нужна отдельная функция для ввода
+    # date_create_end = input()  # Дата до которой ищем, нужна отдельная функция для ввода
+    # Название предмета ссылку на конспект которого мы хотим получить, нужна отдельная функция для ввода
+    connect = sqlite3.connect('test.db')
+    cursor = connect.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
+                                                    ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
+                                                    NAME TEXT UNIQUE
+                                                )""")
+    cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
+                                                    ID_USER INT,
+                                                    ID_SUBJECT INT,     
+                                                    DATE_UPLOAD DATETIME,
+                                                    DATE_NOTE DATE,
+                                                    LINK TEXT,
+                                                    NAME_FILE TEXT
+                                                )""")
     subjects_id = [int(str(x)[1:-2]) for x in
-                   cursor.execute(f"""SELECT ID_SUBJECT FROM SUBJECT WHERE NAME LIKE '%{subject}%'""")]
+                   cursor.execute(f"""SELECT ID_SUBJECT FROM SUBJECT WHERE NAME = '{subject}'""")]
     files_search_1 = [str(x)[2:-3] for x in
                       cursor.execute("""SELECT LINK FROM DOWNLOADS WHERE ID_SUBJECT IN (?)""", subjects_id)]
-    # name = [] # В разработке...
-    if date_create_start == '' and date_create_end != '':
-        date_create_start = date_create_end
-    elif date_create_start != '' and date_create_end == '':
-        date_create_end = date_create_start
-    elif date_create_start == '' and date_create_end == '':
-        date_create_start = '01/01/1900'
-        date_create_end = '01/01/2050'
-    files_search_2 = [str(x)[2:-3] for x in cursor.execute(
-        f"""SELECT LINK FROM DOWNLOADS WHERE DATE_NOTE BETWEEN {date_create_start} AND {date_create_end}""")]
-    if files_search_1 and files_search_2:
+    # if date_create_start == '' and date_create_end != '':
+    #     date_create_start = date_create_end
+    # elif date_create_start != '' and date_create_end == '':
+    #     date_create_end = date_create_start
+    # elif date_create_start == '' and date_create_end == '':
+    #     date_create_start = '01/01/1900'
+    #     date_create_end = '01/01/2050'
+    # files_search_3 = [str(x)[2:-3] for x in cursor.execute(
+    #     f"""SELECT LINK FROM DOWNLOADS WHERE DATE_NOTE BETWEEN {date_create_start} AND {date_create_end}""")]
+    files_search_2 = [str(x)[2:-3] for x in
+                      cursor.execute(f"""SELECT LINK FROM DOWNLOADS WHERE NAME_FILE = '{name}'""")]
+    if subject and name:
         final_files = set(files_search_1) & set(files_search_2)
-    elif files_search_1:
+    elif subject:
         final_files = files_search_1
     else:
         final_files = files_search_2
-    return final_files
-    # if name == '':
-    #     name = cursor.execute("""SELECT NAME_FILE FROM DOWNLOADS""")
-    #     name = [str(x)[2:-3] for x in name]
+    connect.commit()
+    if final_files:
+        return final_files
+    else:
+        return False
+
+
+def all_name_files():
+    connect = sqlite3.connect('test.db')
+    cursor = connect.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
+                                                ID_USER INT,
+                                                ID_SUBJECT INT,     
+                                                DATE_UPLOAD DATETIME,
+                                                DATE_NOTE DATE,
+                                                LINK TEXT,
+                                                NAME_FILE TEXT
+                                            )""")
+    return [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME_FILE FROM DOWNLOADS""")]
 
 
 # create_subject()
 # download_inf_file_in_db(k, subject_name, date_note)
 # print(upload_file_from_db())
 # create_account()
-download_inf_file_in_db(1, 'ОРГ', '13.10.2025')
-connect.commit()
+# download_inf_file_in_db(1, 'ОРГ', '13.10.2025')
+# print(upload_file_from_db('ОРГ', 'qeqe'))
+print(all_name_files())

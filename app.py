@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLa
     QBoxLayout, QTabWidget, QListWidget, QFileDialog, QTextEdit, QMessageBox, QToolButton
 from PyQt6.QtGui import QPixmap, QIcon  # для картинок
 from PyQt6.QtCore import Qt, QFile, QIODevice, QTextStream, QSize
-from main import create_account, login_system, request_subject
+from main import create_account, login_system, all_name_subject
 
 
 class Matan_Window(QWidget):  # окно с конспектами по матану
@@ -87,7 +87,7 @@ class Main_Window(QWidget):  # окно с выбором предмета, ос
         sub_name = QLabel("предмет:", self)
 
         self.vari = QComboBox(self)
-        list_subject = [""] + request_subject()
+        list_subject = [""] + all_name_subject()
         self.vari.addItems(list_subject)
         self.ac_button = QPushButton("подтвердить", self)
         self.ac_button.clicked.connect(self.show_current_selection)
