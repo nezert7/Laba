@@ -530,7 +530,7 @@ class Log_Window(QWidget):#окно регистрации
             user_data = self.get_input_data()
             #print(f"Данные для регистрации: {user_data}")#вывод в терминал для проверки
             self.close()
-            self.goto_ScreenFirst()
+            self.goto_MainWindow()
         else:
             QMessageBox.warning(self, "Ошибка регистрации", message)
 
@@ -564,12 +564,12 @@ class First_Window(QWidget):#окно открытия приложения, в�
         head_text.setAlignment(Qt.AlignmentFlag.AlignRight)
         log = QLabel("введите логин", self)
         self.input_log = QLineEdit(self)
-        self.input_log.textEdited.connect(self.checkCode)
+        
         pas = QLabel("введите пароль", self)
         self.input_pas = QLineEdit(self)
-        self.input_pas.textEdited.connect(self.checkCode)
+        
         self.ot_button = QPushButton("войти", self)
-        self.ot_button.setEnabled(False)
+        self.ot_button.clicked.connect(self.process_login)
         #self.ot_button.QShortcut(QKeySequence('Ctrl+O'), self)
         self.log_button = QPushButton("зарегистрироваться", self)
         self.log_button.clicked.connect(self.gotoScreen_log)
@@ -587,13 +587,31 @@ class First_Window(QWidget):#окно открытия приложения, в�
 
         self.setLayout(main_v_box)
 
-    def checkCode(self):#работа кнопки вход
-        if len(self.input_log.text()) > 0 and len(self.input_pas.text()) > 0:#надо сравнить с данными из бд
-            self.ot_button.setEnabled(True)
-            self.ot_button.clicked.connect(self.gotoScreen_Main)
-        else:
-            self.ot_button.setEnabled(False)
+    def validate_login_data(self):#Проверяет валидность данных для авторизации
+        username = self.input_log.text().strip()
+        password = self.input_pas.text().strip()
+        
+        if not username or not password:
+            return False, "Заполните все поля"
+        
+        return True, ""
 
+    def process_login(self):#Обрабатывает нажатие кнопки входа
+        is_valid, message = self.validate_login_data()
+        
+        if is_valid:
+            login_data = self.get_input_data()
+            #print(f"Данные для авторизации: {login_data}")#вывод в терминал для проверки
+            self.gotoScreen_Main()
+        else:
+            QMessageBox.warning(self, "Ошибка авторизации", message)
+
+    def get_input_data(self):
+        return {
+            'username': self.input_log.text().strip(),
+            'password': self.input_pas.text().strip()
+        }
+    
     def gotoScreen_log(self):#переход на окно регистрации
         self.hide()
         self.screen_log = Log_Window()
