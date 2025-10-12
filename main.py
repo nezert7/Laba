@@ -3,6 +3,7 @@ import os
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 from datetime import datetime
+from tkinter import filedialog
 import hashlib
 import gdown
 
@@ -58,7 +59,7 @@ def create_account(user_name, password):
         return 'Такой пользователь уже существует'  # здесь нужна функция, которая выведет подобную ошибку на экран
 
 
-def download_file():
+def download_file_in_pc():
     url = upload_file_from_db()
     output = 'myfile.txt'
     gdown.download(url, output, quiet=False)
@@ -123,27 +124,38 @@ def request_subject():
     return [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME FROM SUBJECT""")]
 
 
-def create_subject():  # Функция для добавления в db новый предметов
-    new_subject = input(
-        'Введите предмет который хотите добавить: ')  # Здесь должна быть функция, возвращающая предмет, который пользователь хочет добавить
+def create_subject(new_subject):  # Функция для добавления в db новый предметов
     cursor.execute("SELECT 1 FROM SUBJECT WHERE NAME = ?", (new_subject,))
     exists = cursor.fetchone()
     if not exists:
         cursor.execute("INSERT INTO SUBJECT(NAME) VALUES (?)", (new_subject,))
-        return 'Successful'
-    else:
-        return 'Error такой предмет уже существует'
+        connect.commit()
+
+
+def choose_file(): # Открываем проводник
+    file_path = filedialog.askopenfilename()
+    return file_path
 
 
 def download_inf_file_in_db(id_user, subject_name,
                             date_note):  # Функция для загрузки ссылки на файл и всей информации про файл в db
+    connect = sqlite3.connect('test.db')
+    cursor = connect.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
+                                                ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
+                                                NAME TEXT UNIQUE
+                                            )""")
+    all_subject = [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME FROM SUBJECT""")]
+    if subject_name not in all_subject:
+        create_subject(subject_name)
     subject_id = int(
         [str(x)[1:-2] for x in cursor.execute(f"""SELECT ID_SUBJECT FROM SUBJECT WHERE NAME = '{subject_name}'""")][0])
-    link, file_name = map(str, upload_to_drive("C:\\Users\\kosty\\Downloads\\Электрические схемы Jeep WK.pdf",
-                                               folder_id="1zVT6Fr6LzzqzXWO9RJdl8d89uQIIJew-"))  # Здесь file_path пользователь должен указать сам или автоматически при выборе файла
+    link, file_name = map(str, upload_to_drive(choose_file(),
+                                               folder_id="1zVT6Fr6LzzqzXWO9RJdl8d89uQIIJew-"))
     cursor.execute("""INSERT INTO DOWNLOADS
                                     VALUES(?, ?, ?, ?, ?, ?)""",
                    (id_user, subject_id, date_now(), date_note, link, file_name))
+    connect.commit()
 
 
 def upload_file_from_db():  # Здесь мы выгружаем из db ссылку на файл который хотим открыть, присутствует сортировка по имени и дате
@@ -180,4 +192,5 @@ def upload_file_from_db():  # Здесь мы выгружаем из db ссы�
 # download_inf_file_in_db(k, subject_name, date_note)
 # print(upload_file_from_db())
 # create_account()
+download_inf_file_in_db(1, 'ОРГ', '13.10.2025')
 connect.commit()
