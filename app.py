@@ -401,40 +401,44 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
             {'предмет': 'матан', 'название конспекта': '1', 'ссылка': "https://www.pythontutorial.net/pyqt/pyqt-qtablewidget/", 'дата': 22},
         ]#список изначальных конспектов
 
-        self.table = QTableWidget(self)#создание таблицы
-        self.setCentralWidget(self.table)
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        main_layout = QVBoxLayout(central_widget)
+
+        filter_layout = QHBoxLayout()
+        
+        filter_label = QLabel("Фильтр по предмету:")
+        self.filter_combo = QComboBox()
+        self.filter_combo.addItem("все предметы")
+        self.filter_combo.currentTextChanged.connect(self.apply_filter)
+        
+        filter_layout.addWidget(filter_label)
+        filter_layout.addWidget(self.filter_combo)
+        filter_layout.addStretch()
+        
+        main_layout.addLayout(filter_layout)
+
+        self.table = QTableWidget()
+        main_layout.addWidget(self.table)
 
         self.table.setColumnCount(4)#кол-во столбцов
         self.table.setColumnWidth(0, 150)#настройка ширины столбцов
         self.table.setColumnWidth(1, 150)#настройка ширины столбцов
-        self.table.setColumnWidth(2, 50)#увеличиваем ширину для ссылок
+        self.table.setColumnWidth(2, 300)#настройка ширины столбцов
         self.table.setColumnWidth(3, 50)#настройка ширины столбцов
 
-        self.table.setHorizontalHeaderLabels(self.conspect[0].keys())#горизонтальные заголовки таблицы
-        self.table.setRowCount(len(self.conspect))#кол-во строк = кол-ву конспектов
+        self.table.setHorizontalHeaderLabels(['предмет', 'название конспекта', 'ссылка', 'дата'])#горизонтальные заголовки таблицы
+        
+        self.populate_table()#заполняем таблицу данными
+        
+        self.update_filter_combo()#обновляем комбобокс фильтра
 
-        row = 0
-        for e in self.conspect:#добавление в таблицу
-            self.table.setItem(row, 0, QTableWidgetItem(e['предмет']))
-            self.table.setItem(row, 1, QTableWidgetItem(e['название конспекта']))
-            
-            # Создаем ячейку для ссылки с особым оформлением
-            link_item = QTableWidgetItem(e['ссылка'])
-            link_item.setForeground(Qt.GlobalColor.blue)  # Синий цвет для ссылки
-            link_item.setToolTip(f"Нажмите чтобы открыть: {e['ссылка']}")  # Подсказка
-            self.table.setItem(row, 2, link_item)
-            
-            self.table.setItem(row, 3, QTableWidgetItem(str(e['дата'])))
-            row += 1
-
-        # Подключаем обработчик кликов по ячейкам
-        self.table.cellClicked.connect(self.on_cell_clicked)
+        self.table.cellClicked.connect(self.on_cell_clicked)#подключаем обработчик кликов по ячейкам
 
         dock = QDockWidget('добавить конспект')
         dock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
 
-        # create form
         form = QWidget()
         layout = QFormLayout(form)
         form.setLayout(layout)
@@ -442,19 +446,18 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         self.subject_name = QLineEdit(form)
         self.conspect_name = QLineEdit(form)
         self.link = QLineEdit(form)
-        self.age = QSpinBox(form, minimum=1, maximum=31)  # Изменил на дни месяца
+        self.age = QSpinBox(form, minimum=1, maximum=31)
         self.age.clear()
 
         layout.addRow('предмет:', self.subject_name)
         layout.addRow('название конспекта:', self.conspect_name)
         layout.addRow('ссылка:', self.link)
-        layout.addRow('дата (день):', self.age)  # Уточнил подпись
+        layout.addRow('дата (день):', self.age)
 
         btn_add = QPushButton('добавить')
         btn_add.clicked.connect(self.add_employee)
         layout.addRow(btn_add)
 
-        # add delete & edit button
         toolbar = QToolBar('main toolbar')
         toolbar.setIconSize(QSize(16,16))
         self.addToolBar(toolbar)
@@ -463,13 +466,55 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         delete_action.triggered.connect(self.delete)
         toolbar.addAction(delete_action)
         dock.setWidget(form)
+
+    def populate_table(self, filter_subject=None):#заполняет таблицу данными с учетом фильтра
+        self.table.setRowCount(0)#очищаем таблицу
+        
+        row = 0
+        for e in self.conspect:#применяем фильтр, если он задан
+            if filter_subject and filter_subject != "все предметы" and e['предмет'] != filter_subject:
+                continue
+                
+            self.table.insertRow(row)
+            self.table.setItem(row, 0, QTableWidgetItem(e['предмет']))
+            self.table.setItem(row, 1, QTableWidgetItem(e['название конспекта']))
+            
+            link_item = QTableWidgetItem(e['ссылка'])#создаем ячейку для ссылки с особым оформлением
+            link_item.setForeground(Qt.GlobalColor.blue)#синий цвет для ссылки
+            link_item.setToolTip(f"Нажмите чтобы открыть: {e['ссылка']}")#подсказка
+            self.table.setItem(row, 2, link_item)
+            
+            self.table.setItem(row, 3, QTableWidgetItem(str(e['дата'])))
+            row += 1
+
+    def update_filter_combo(self):#обновляет список предметов в комбобоксе фильтра
+        current_filter = self.filter_combo.currentText()
+        self.filter_combo.clear()
+        self.filter_combo.addItem("все предметы")
+        
+        subjects = set()#собираем уникальные предметы
+        for item in self.conspect:
+            subjects.add(item['предмет'])
+        
+        for subject in sorted(subjects):#добавляем предметы в комбобокс
+            self.filter_combo.addItem(subject)
+        
+        if current_filter in [self.filter_combo.itemText(i) for i in range(self.filter_combo.count())]:#восстанавливаем предыдущий фильтр, если он еще существует
+            self.filter_combo.setCurrentText(current_filter)
+        else:
+            self.filter_combo.setCurrentText("все предметы")
+
+    def apply_filter(self, subject):#применяет фильтр по выбранному предмету
+        if subject == "все предметы":
+            self.populate_table() #показываем все записи
+        else:
+            self.populate_table(subject)#показываем только выбранный предмет
     
-    def on_cell_clicked(self, row, column):
-        """Обработчик клика по ячейке таблицы"""
-        if column == 2:  # Только для столбца с ссылками
+    def on_cell_clicked(self, row, column):#обработчик клика по ячейке таблицы
+        if column == 2:#только для столбца с ссылками
             item = self.table.item(row, column)
             if item and item.text().startswith(('http://', 'https://')):
-                reply = QMessageBox.question(self, 'Открыть ссылку', f'Вы хотите открыть ссылку:\n{item.text()}', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)# Спрашиваем подтверждение перед открытием
+                reply = QMessageBox.question(self, 'открыть ссылку', f'вы хотите открыть ссылку:\n{item.text()}', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)# Спрашиваем подтверждение перед открытием
                 if reply == QMessageBox.StandardButton.Yes:
                     try:
                         webbrowser.open(item.text())
@@ -486,17 +531,22 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         self.table.setItem(row, 0, QTableWidgetItem(self.subject_name.text().strip()))
         self.table.setItem(row, 1, QTableWidgetItem(self.conspect_name.text()))
         
-        link_item = QTableWidgetItem(self.link.text())# Добавляем ссылку с оформлением
+        link_item = QTableWidgetItem(self.link.text())#добавление ссылку с оформлением
         link_item.setForeground(Qt.GlobalColor.blue)
         link_item.setToolTip(f"нажмите чтобы открыть: {self.link.text()}")
         self.table.setItem(row, 2, link_item)
         
         self.table.setItem(row, 3, QTableWidgetItem(self.age.text()))
 
-        self.reset()
-        
-        self.conspect.append({'предмет': self.subject_name.text().strip(), 'название конспекта': self.conspect_name.text(), 'ссылка': self.link.text(), 'дата': self.age.text()})
+        new_conspect = {'предмет': self.subject_name.text().strip(), 'название конспекта': self.conspect_name.text(), 'ссылка': self.link.text(), 'дата': self.age.text()}
+        self.conspect.append(new_conspect)
+    
+        self.update_filter_combo()#обновляем фильтр и применяем текущий
+        current_filter = self.filter_combo.currentText()
+        if current_filter == "все предметы" or current_filter == self.new_conspect['предмет']:
+            self.apply_filter(current_filter)
 
+        self.reset()
 
     def delete(self):#кнопка удаление конспекта
         current_row = self.table.currentRow()
@@ -504,10 +554,16 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
             return QMessageBox.warning(self, 'Error','выберите строку, чтоб удалить')
 
         button = QMessageBox.question(self, 'Error', 'вы уверены, что хотите удалить выбранную строку?', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        if button == QMessageBox.StandardButton.Yes:
+        if button == QMessageBox.StandardButton.Yes:#получаем предмет удаляемой строки для обновления фильтра
+            deleted_subject = self.table.item(current_row, 0).text()
+            
             self.table.removeRow(current_row)
-            if current_row < len(self.conspect):# Также удаляем из списка conspect
+            if current_row < len(self.conspect):#удаляем из списка conspect
                 self.conspect.pop(current_row)
+            
+            self.update_filter_combo()#обновляем фильтр
+            current_filter = self.filter_combo.currentText()
+            self.apply_filter(current_filter)
 
     def valid(self):
         subject_name = self.subject_name.text().strip()
