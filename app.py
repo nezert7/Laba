@@ -1,4 +1,5 @@
 import sys
+import webbrowser #чтоб ссылки открывались
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QBoxLayout, QTabWidget, QListWidget, QFileDialog, QTextEdit, QMessageBox, QTableWidget, QTableWidgetItem, QDockWidget, QFormLayout, QSpinBox, QToolBar, QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QDockWidget, QFormLayout, QLineEdit, QWidget, QPushButton, QSpinBox, QMessageBox, QToolBar, QMessageBox
 from PyQt6.QtGui import QPixmap, QIcon, QAction
 from PyQt6.QtCore import Qt, QFile, QIODevice, QTextStream, QSize
@@ -406,7 +407,7 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         self.table.setColumnCount(4)#кол-во столбцов
         self.table.setColumnWidth(0, 150)#настройка ширины столбцов
         self.table.setColumnWidth(1, 150)#настройка ширины столбцов
-        self.table.setColumnWidth(2, 50)#настройка ширины столбцов
+        self.table.setColumnWidth(2, 50)#увеличиваем ширину для ссылок
         self.table.setColumnWidth(3, 50)#настройка ширины столбцов
 
         self.table.setHorizontalHeaderLabels(self.conspect[0].keys())#горизонтальные заголовки таблицы
@@ -416,9 +417,18 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         for e in self.conspect:#добавление в таблицу
             self.table.setItem(row, 0, QTableWidgetItem(e['предмет']))
             self.table.setItem(row, 1, QTableWidgetItem(e['название конспекта']))
-            self.table.setItem(row, 2, QTableWidgetItem(e['ссылка']))
+            
+            # Создаем ячейку для ссылки с особым оформлением
+            link_item = QTableWidgetItem(e['ссылка'])
+            link_item.setForeground(Qt.GlobalColor.blue)  # Синий цвет для ссылки
+            link_item.setToolTip(f"Нажмите чтобы открыть: {e['ссылка']}")  # Подсказка
+            self.table.setItem(row, 2, link_item)
+            
             self.table.setItem(row, 3, QTableWidgetItem(str(e['дата'])))
             row += 1
+
+        # Подключаем обработчик кликов по ячейкам
+        self.table.cellClicked.connect(self.on_cell_clicked)
 
         dock = QDockWidget('добавить конспект')
         dock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
@@ -429,17 +439,16 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         layout = QFormLayout(form)
         form.setLayout(layout)
 
-
         self.subject_name = QLineEdit(form)
         self.conspect_name = QLineEdit(form)
         self.link = QLineEdit(form)
-        self.age = QSpinBox(form, minimum=18, maximum=67)#бегунок для даты, надо переделать
+        self.age = QSpinBox(form, minimum=1, maximum=31)  # Изменил на дни месяца
         self.age.clear()
 
         layout.addRow('предмет:', self.subject_name)
         layout.addRow('название конспекта:', self.conspect_name)
         layout.addRow('ссылка:', self.link)
-        layout.addRow('дата:', self.age)
+        layout.addRow('дата (день):', self.age)  # Уточнил подпись
 
         btn_add = QPushButton('добавить')
         btn_add.clicked.connect(self.add_employee)
@@ -450,10 +459,23 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         toolbar.setIconSize(QSize(16,16))
         self.addToolBar(toolbar)
 
-        delete_action = QAction(QIcon('./assets/remove.png'), '&Delete', self)
+        delete_action = QAction('&Delete', self)
         delete_action.triggered.connect(self.delete)
         toolbar.addAction(delete_action)
         dock.setWidget(form)
+    
+    def on_cell_clicked(self, row, column):
+        """Обработчик клика по ячейке таблицы"""
+        if column == 2:  # Только для столбца с ссылками
+            item = self.table.item(row, column)
+            if item and item.text().startswith(('http://', 'https://')):
+                reply = QMessageBox.question(self, 'Открыть ссылку', f'Вы хотите открыть ссылку:\n{item.text()}', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)# Спрашиваем подтверждение перед открытием
+                if reply == QMessageBox.StandardButton.Yes:
+                    try:
+                        webbrowser.open(item.text())
+                        QMessageBox.information(self, 'успешно', 'ссылка открывается в браузере')
+                    except Exception as e:
+                        QMessageBox.critical(self, 'Error', f'не удалось открыть ссылку: {str(e)}')
     
     def add_employee(self):#добавление нового конспекта
         if not self.valid():
@@ -463,7 +485,12 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         self.table.insertRow(row)
         self.table.setItem(row, 0, QTableWidgetItem(self.subject_name.text().strip()))
         self.table.setItem(row, 1, QTableWidgetItem(self.conspect_name.text()))
-        self.table.setItem(row, 2, QTableWidgetItem(self.link.text()))
+        
+        link_item = QTableWidgetItem(self.link.text())# Добавляем ссылку с оформлением
+        link_item.setForeground(Qt.GlobalColor.blue)
+        link_item.setToolTip(f"нажмите чтобы открыть: {self.link.text()}")
+        self.table.setItem(row, 2, link_item)
+        
         self.table.setItem(row, 3, QTableWidgetItem(self.age.text()))
 
         self.reset()
@@ -474,11 +501,13 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
     def delete(self):#кнопка удаление конспекта
         current_row = self.table.currentRow()
         if current_row < 0:
-            return QMessageBox.warning(self, 'Warning','Please select a record to delete')
+            return QMessageBox.warning(self, 'Error','выберите строку, чтоб удалить')
 
-        button = QMessageBox.question(self, 'Confirmation', 'Are you sure that you want to delete the selected row?', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        button = QMessageBox.question(self, 'Error', 'вы уверены, что хотите удалить выбранную строку?', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if button == QMessageBox.StandardButton.Yes:
             self.table.removeRow(current_row)
+            if current_row < len(self.conspect):# Также удаляем из списка conspect
+                self.conspect.pop(current_row)
 
     def valid(self):
         subject_name = self.subject_name.text().strip()
@@ -494,10 +523,16 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
             QMessageBox.critical(self, 'Error', 'пожалуйста добавьте тему конспекта')
             self.conspect_name.setFocus()
             return False
+        
         if not link:
             QMessageBox.critical(self, 'Error', 'пожалуйста добавьте ссылку на конспект')
-            self.conspect_name.setFocus()
+            self.link.setFocus()
             return False
+        
+        if not link.startswith(('http://', 'https://')):# Проверяем, что ссылка начинается с http:// или https://
+            QMessageBox.warning(self, 'Error', 'ссылка должна начинаться с http:// или https://\nДобавляю https:// автоматически')
+            self.link.setText('https://' + link)
+            return self.valid()  # Повторная проверка
 
         try:
             age = int(self.age.text().strip())
@@ -506,8 +541,9 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
             self.age.setFocus()
             return False
 
-        if age <= 0 or age >= 67:
-            QMessageBox.critical(self, 'Error', 'The valid age is between 1 and 67')#ошибка с датой надо придумать
+        if age <= 0 or age > 31:
+            QMessageBox.critical(self, 'Error', 'дата должна быть числом от 1 до 31')
+            self.age.setFocus()
             return False
 
         return True
