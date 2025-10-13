@@ -394,18 +394,19 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
 
     def setUpMain_Window(self):
         conspect = [
-            {'предмет': 'матан', 'название конспекта': '1', 'дата': 25},
-            {'предмет': 'матан', 'название конспекта': '1', 'дата': 22},
-            {'предмет': 'матан', 'название конспекта': '1', 'дата': 22},
+            {'предмет': 'матан', 'название конспекта': '1', 'ссылка': "https://www.pythontutorial.net/pyqt/pyqt-qtablewidget/", 'дата': 25},
+            {'предмет': 'матан', 'название конспекта': '1', 'ссылка': "https://www.pythontutorial.net/pyqt/pyqt-qtablewidget/", 'дата': 22},
+            {'предмет': 'матан', 'название конспекта': '1', 'ссылка': "https://www.pythontutorial.net/pyqt/pyqt-qtablewidget/", 'дата': 22},
         ]#список изначальных конспектов
 
         self.table = QTableWidget(self)#создание таблицы
         self.setCentralWidget(self.table)
 
-        self.table.setColumnCount(3)#кол-во столбцов
+        self.table.setColumnCount(4)#кол-во столбцов
         self.table.setColumnWidth(0, 150)#настройка ширины столбцов
         self.table.setColumnWidth(1, 150)#настройка ширины столбцов
         self.table.setColumnWidth(2, 50)#настройка ширины столбцов
+        self.table.setColumnWidth(3, 50)#настройка ширины столбцов
 
         self.table.setHorizontalHeaderLabels(conspect[0].keys())#горизонтальные заголовки таблицы
         self.table.setRowCount(len(conspect))#кол-во строк = кол-ву конспектов
@@ -414,7 +415,8 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         for e in conspect:#добавление в таблицу
             self.table.setItem(row, 0, QTableWidgetItem(e['предмет']))
             self.table.setItem(row, 1, QTableWidgetItem(e['название конспекта']))
-            self.table.setItem(row, 2, QTableWidgetItem(str(e['дата'])))
+            self.table.setItem(row, 2, QTableWidgetItem(e['ссылка']))
+            self.table.setItem(row, 3, QTableWidgetItem(str(e['дата'])))
             row += 1
 
         dock = QDockWidget('добавить конспект')
@@ -427,13 +429,15 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         form.setLayout(layout)
 
 
-        self.first_name = QLineEdit(form)
-        self.last_name = QLineEdit(form)
+        self.subject_name = QLineEdit(form)
+        self.conspect_name = QLineEdit(form)
+        self.link = QLineEdit(form)
         self.age = QSpinBox(form, minimum=18, maximum=67)#бегунок для даты, надо переделать
         self.age.clear()
 
-        layout.addRow('предмет:', self.first_name)
-        layout.addRow('название конспекта:', self.last_name)
+        layout.addRow('предмет:', self.subject_name)
+        layout.addRow('название конспекта:', self.conspect_name)
+        layout.addRow('ссылка:', self.link)
         layout.addRow('дата:', self.age)
 
         btn_add = QPushButton('добавить')
@@ -461,18 +465,22 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
             self.table.removeRow(current_row)
 
     def valid(self):
-        first_name = self.first_name.text().strip()
-        last_name = self.last_name.text().strip()
-
+        subject_name = self.subject_name.text().strip()
+        conspect_name = self.conspect_name.text().strip()
+        link = self.link.text().strip()
         
-        if not first_name:
+        if not subject_name:
             QMessageBox.critical(self, 'Error', 'пожалуйста добавьте название предмета')
-            self.first_name.setFocus()
+            self.subject_name.setFocus()
             return False
 
-        if not last_name:
+        if not conspect_name:
             QMessageBox.critical(self, 'Error', 'пожалуйста добавьте тему конспекта')
-            self.last_name.setFocus()
+            self.conspect_name.setFocus()
+            return False
+        if not link:
+            QMessageBox.critical(self, 'Error', 'пожалуйста добавьте ссылку на конспект')
+            self.conspect_name.setFocus()
             return False
 
         try:
@@ -489,8 +497,9 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         return True
 
     def reset(self):
-        self.first_name.clear()
-        self.last_name.clear()
+        self.subject_name.clear()
+        self.conspect_name.clear()
+        self.link.clear()
         self.age.clear()
 
     def add_employee(self):#добавление нового конспекта
@@ -499,9 +508,10 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
 
         row = self.table.rowCount()
         self.table.insertRow(row)
-        self.table.setItem(row, 0, QTableWidgetItem(self.first_name.text().strip()))
-        self.table.setItem(row, 1, QTableWidgetItem(self.last_name.text()))
-        self.table.setItem(row, 2, QTableWidgetItem(self.age.text()))
+        self.table.setItem(row, 0, QTableWidgetItem(self.subject_name.text().strip()))
+        self.table.setItem(row, 1, QTableWidgetItem(self.conspect_name.text()))
+        self.table.setItem(row, 2, QTableWidgetItem(self.link.text()))
+        self.table.setItem(row, 3, QTableWidgetItem(self.age.text()))
 
         self.reset()
 
