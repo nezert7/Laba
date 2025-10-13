@@ -543,7 +543,7 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
     
         self.update_filter_combo()#обновляем фильтр и применяем текущий
         current_filter = self.filter_combo.currentText()
-        if current_filter == "все предметы" or current_filter == self.new_conspect['предмет']:
+        if current_filter == "все предметы" or current_filter == new_conspect['предмет']:
             self.apply_filter(current_filter)
 
         self.reset()
