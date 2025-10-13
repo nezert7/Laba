@@ -59,12 +59,6 @@ def create_account(user_name, password):
         return False
 
 
-def download_file_in_pc():
-    url = upload_file_from_db()
-    output = 'myfile.txt'
-    gdown.download(url, output, quiet=False)
-
-
 def login_system(user_name, input_password):  # Функция для проверки логина и пароля под которыми входит пользователь
     connect = sqlite3.connect('test.db')
     cursor = connect.cursor()
@@ -134,6 +128,11 @@ def create_subject(new_subject):  # Функция для добавления �
 
 def choose_file():  # Открываем проводник
     file_path = filedialog.askopenfilename()
+    return file_path
+
+
+def choose_folder():
+    file_path = filedialog.askdirectory()
     return file_path
 
 
@@ -227,6 +226,27 @@ def all_name_files():
     return [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME_FILE FROM DOWNLOADS""")]
 
 
+def extract_file_id(url):
+    if '/d/' in url:
+        return url.split('/d/')[1].split('/')[0]
+    elif 'id=' in url:
+        return url.split('id=')[1].split('&')[0]
+    else:
+        return None
+
+
+def download_from_gdrive():
+    # Извлекаем ID файла
+    file_id = extract_file_id()
+    url = f"https://drive.google.com/uc?id={file_id}"
+    file_name = "model.pdf"
+    save_path = os.path.join(choose_folder(), file_name)
+
+    gdown.download(url, save_path, quiet=False)
+
+
+# Пример использования
+# download_from_gdrive()
 # create_subject()
 # download_inf_file_in_db(k, subject_name, date_note)
 # print(upload_file_from_db())
