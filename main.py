@@ -233,4 +233,4 @@ def all_name_files():
 # create_account()
 # download_inf_file_in_db(1, 'ОРГ', '13.10.2025')
 # print(upload_file_from_db('ОРГ', 'qeqe'))
-print(all_name_files())
+# print(all_name_files())

@@ -144,6 +144,10 @@ class Log_Window(QWidget):  # окно регистрации
         self.toggle_button.setCheckable(True)
         self.toggle_button.setFixedSize(QSize(24, 24))
         self.toggle_button.clicked.connect(self.toggle_password_visibility)
+        self.toggle_button2 = QPushButton("👁️")
+        self.toggle_button2.setCheckable(True)
+        self.toggle_button2.setFixedSize(QSize(24, 24))
+        self.toggle_button2.clicked.connect(self.toggle_password_visibility2)
 
         self.log_button = QPushButton("зарегистрироваться", self)
         self.log_button.clicked.connect(self.process_registration)
@@ -156,11 +160,12 @@ class Log_Window(QWidget):  # окно регистрации
         pasr2_h_box = QHBoxLayout()
         logr_h_box.addWidget(self.input_logr)
         pasr_h_box.addWidget(self.input_pasr)
+        pasr_h_box.addWidget(self.toggle_button)
         pasr2_h_box.addWidget(self.input_pasr2)
+        pasr2_h_box.addWidget(self.toggle_button2)
         main_v_box.addLayout(logr_h_box)
         main_v_box.addLayout(pasr_h_box)
         main_v_box.addLayout(pasr2_h_box)
-        main_v_box.addWidget(self.toggle_button)
         main_v_box.addWidget(self.log_button)
         main_v_box.addWidget(self.exit_button)
 
@@ -200,9 +205,12 @@ class Log_Window(QWidget):  # окно регистрации
     def toggle_password_visibility(self):
         if self.toggle_button.isChecked():
             self.input_pasr.setEchoMode(QLineEdit.EchoMode.Normal)
-            self.input_pasr2.setEchoMode(QLineEdit.EchoMode.Normal)
         else:
             self.input_pasr.setEchoMode(QLineEdit.EchoMode.Password)
+    def toggle_password_visibility2(self):
+        if self.toggle_button2.isChecked():
+            self.input_pasr2.setEchoMode(QLineEdit.EchoMode.Normal)
+        else:
             self.input_pasr2.setEchoMode(QLineEdit.EchoMode.Password)
 
 
@@ -244,9 +252,9 @@ class First_Window(QWidget):  # окно открытия приложения, 
         pas_h_box = QHBoxLayout()
         log_h_box.addWidget(self.input_log)
         pas_h_box.addWidget(self.input_pas)
+        pas_h_box.addWidget(self.toggle_button)
         main_v_box.addLayout(log_h_box)
         main_v_box.addLayout(pas_h_box)
-        main_v_box.addWidget(self.toggle_button)
         main_v_box.addWidget(self.ot_button)
         main_v_box.addWidget(self.log_button)
 
