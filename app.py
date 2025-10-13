@@ -1,7 +1,7 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QBoxLayout, QTabWidget, QListWidget, QFileDialog, QTextEdit, QMessageBox
-from PyQt6.QtGui import QPixmap #для картинок
-from PyQt6.QtCore import Qt, QFile, QIODevice, QTextStream
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, QBoxLayout, QTabWidget, QListWidget, QFileDialog, QTextEdit, QMessageBox, QTableWidget, QTableWidgetItem, QDockWidget, QFormLayout, QSpinBox, QToolBar, QApplication, QMainWindow, QTableWidget, QTableWidgetItem, QDockWidget, QFormLayout, QLineEdit, QWidget, QPushButton, QSpinBox, QMessageBox, QToolBar, QMessageBox
+from PyQt6.QtGui import QPixmap, QIcon, QAction
+from PyQt6.QtCore import Qt, QFile, QIODevice, QTextStream, QSize
 
 class Gram_Window(QWidget):#окно с конспектами по цг
     def  __init__(self):
@@ -381,7 +381,7 @@ class Matan_Window(QWidget):#окно с конспектами по матан�
         self.screen_main = Main_Window()
         self.screen_main.show()
 
-class Main_Window(QWidget):#окно с выбором предмета, основное окно приложения
+class Main_Window(QMainWindow):#окно с выбором предмета, основное окно приложения
     def  __init__(self):
         super().__init__()
         self.initializeUI()
@@ -393,71 +393,117 @@ class Main_Window(QWidget):#окно с выбором предмета, осн�
         self.show()
 
     def setUpMain_Window(self):
-        main_v_box = QVBoxLayout()
-        sub_name = QLabel("предмет:", self)
+        conspect = [
+            {'предмет': 'матан', 'название конспекта': '1', 'дата': 25},
+            {'предмет': 'матан', 'название конспекта': '1', 'дата': 22},
+            {'предмет': 'матан', 'название конспекта': '1', 'дата': 22},
+        ]#список изначальных конспектов
 
-        self.vari = QComboBox(self)
-        self.vari.addItems([" ", "матан", "линал", "дискра", "прога", "тп", "цг"])
-        self.ac_button = QPushButton("подтвердить", self)
-        self.ac_button.clicked.connect(self.show_current_selection)
+        self.table = QTableWidget(self)#создание таблицы
+        self.setCentralWidget(self.table)
+
+        self.table.setColumnCount(3)#кол-во столбцов
+        self.table.setColumnWidth(0, 150)#настройка ширины столбцов
+        self.table.setColumnWidth(1, 150)#настройка ширины столбцов
+        self.table.setColumnWidth(2, 50)#настройка ширины столбцов
+
+        self.table.setHorizontalHeaderLabels(conspect[0].keys())#горизонтальные заголовки таблицы
+        self.table.setRowCount(len(conspect))#кол-во строк = кол-ву конспектов
+
+        row = 0
+        for e in conspect:#добавление в таблицу
+            self.table.setItem(row, 0, QTableWidgetItem(e['предмет']))
+            self.table.setItem(row, 1, QTableWidgetItem(e['название конспекта']))
+            self.table.setItem(row, 2, QTableWidgetItem(str(e['дата'])))
+            row += 1
+
+        dock = QDockWidget('добавить конспект')
+        dock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
+
+        # create form
+        form = QWidget()
+        layout = QFormLayout(form)
+        form.setLayout(layout)
+
+
+        self.first_name = QLineEdit(form)
+        self.last_name = QLineEdit(form)
+        self.age = QSpinBox(form, minimum=18, maximum=67)#бегунок для даты, надо переделать
+        self.age.clear()
+
+        layout.addRow('предмет:', self.first_name)
+        layout.addRow('название конспекта:', self.last_name)
+        layout.addRow('дата:', self.age)
+
+        btn_add = QPushButton('добавить')
+        btn_add.clicked.connect(self.add_employee)
+        layout.addRow(btn_add)
+
+        # add delete & edit button
+        toolbar = QToolBar('main toolbar')
+        toolbar.setIconSize(QSize(16,16))
+        self.addToolBar(toolbar)
+
+        delete_action = QAction(QIcon('./assets/remove.png'), '&Delete', self)
+        delete_action.triggered.connect(self.delete)
+        toolbar.addAction(delete_action)
+        dock.setWidget(form)
+
+
+    def delete(self):#кнопка удаление конспекта
+        current_row = self.table.currentRow()
+        if current_row < 0:
+            return QMessageBox.warning(self, 'Warning','Please select a record to delete')
+
+        button = QMessageBox.question(self, 'Confirmation', 'Are you sure that you want to delete the selected row?', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        if button == QMessageBox.StandardButton.Yes:
+            self.table.removeRow(current_row)
+
+    def valid(self):
+        first_name = self.first_name.text().strip()
+        last_name = self.last_name.text().strip()
+
         
-        sub_h_box = QHBoxLayout()
-        sub_h_box.addWidget(sub_name)
-        sub_h_box.addWidget(self.vari)
-        sub_h_box.addWidget(self.vari)
-        sub_h_box.setAlignment(self.vari, Qt.AlignmentFlag.AlignTop)
-        sub_h_box.addWidget(self.ac_button)
-        main_v_box.addLayout(sub_h_box)
+        if not first_name:
+            QMessageBox.critical(self, 'Error', 'пожалуйста добавьте название предмета')
+            self.first_name.setFocus()
+            return False
 
-        main_v_box.setAlignment(sub_h_box, Qt.AlignmentFlag.AlignTop)
+        if not last_name:
+            QMessageBox.critical(self, 'Error', 'пожалуйста добавьте тему конспекта')
+            self.last_name.setFocus()
+            return False
 
-        self.setLayout(main_v_box)
-    def show_current_selection(self):
-        current_text = self.vari.currentText()
-        current_index = self.vari.currentIndex()
-        #self.selection_label.setText(f"Selected: {current_text} (Index: {current_index})")
-        if current_text == "матан":
-            self.ac_button.clicked.connect(self.goto_ScreenMatan)
-        elif current_text == "линал":
-            self.ac_button.clicked.connect(self.goto_ScreenLinal)
-        elif current_text == "дискра":
-            self.ac_button.clicked.connect(self.goto_ScreenDiscra)
-        elif current_text == "прога":
-            self.ac_button.clicked.connect(self.goto_ScreenProga)
-        elif current_text == "тп":
-            self.ac_button.clicked.connect(self.goto_ScreenTp)
-        else:
-            self.ac_button.clicked.connect(self.goto_ScreenGram)
-    
-    def goto_ScreenMatan(self):
-        self.hide()
-        self.screen_matan = Matan_Window()
-        self.screen_matan.show()
+        try:
+            age = int(self.age.text().strip())
+        except ValueError:
+            QMessageBox.critical(self, 'Error', 'пожалуйста добавьте дату создания конспекта')
+            self.age.setFocus()
+            return False
 
-    def goto_ScreenLinal(self):
-        self.hide()
-        self.screen_linal = Linal_Window()
-        self.screen_linal.show()
-    
-    def goto_ScreenDiscra(self):
-        self.hide()
-        self.screen_discra = Discra_Window()
-        self.screen_discra.show()
-    
-    def goto_ScreenProga(self):
-        self.hide()
-        self.screen_proga = Proga_Window()
-        self.screen_proga.show()
-    
-    def goto_ScreenTp(self):
-        self.hide()
-        self.screen_tp = Tp_Window()
-        self.screen_tp.show()
-    
-    def goto_ScreenGram(self):
-        self.hide()
-        self.screen_gram = Gram_Window()
-        self.screen_gram.show()
+        if age <= 0 or age >= 67:
+            QMessageBox.critical(self, 'Error', 'The valid age is between 1 and 67')#ошибка с датой надо придумать
+            return False
+
+        return True
+
+    def reset(self):
+        self.first_name.clear()
+        self.last_name.clear()
+        self.age.clear()
+
+    def add_employee(self):#добавление нового конспекта
+        if not self.valid():
+            return
+
+        row = self.table.rowCount()
+        self.table.insertRow(row)
+        self.table.setItem(row, 0, QTableWidgetItem(self.first_name.text().strip()))
+        self.table.setItem(row, 1, QTableWidgetItem(self.last_name.text()))
+        self.table.setItem(row, 2, QTableWidgetItem(self.age.text()))
+
+        self.reset()
 
 class Log_Window(QWidget):#окно регистрации
     def  __init__(self):
