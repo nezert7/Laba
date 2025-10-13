@@ -384,6 +384,7 @@ class Matan_Window(QWidget):#окно с конспектами по матан�
 class Main_Window(QMainWindow):#окно с выбором предмета, основное окно приложения
     def  __init__(self):
         super().__init__()
+        self.conspect = []
         self.initializeUI()
 
     def initializeUI(self):#задача базовых настроек приложения
@@ -393,7 +394,7 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         self.show()
 
     def setUpMain_Window(self):
-        conspect = [
+        self.conspect = [
             {'предмет': 'матан', 'название конспекта': '1', 'ссылка': "https://www.pythontutorial.net/pyqt/pyqt-qtablewidget/", 'дата': 25},
             {'предмет': 'матан', 'название конспекта': '1', 'ссылка': "https://www.pythontutorial.net/pyqt/pyqt-qtablewidget/", 'дата': 22},
             {'предмет': 'матан', 'название конспекта': '1', 'ссылка': "https://www.pythontutorial.net/pyqt/pyqt-qtablewidget/", 'дата': 22},
@@ -408,11 +409,11 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         self.table.setColumnWidth(2, 50)#настройка ширины столбцов
         self.table.setColumnWidth(3, 50)#настройка ширины столбцов
 
-        self.table.setHorizontalHeaderLabels(conspect[0].keys())#горизонтальные заголовки таблицы
-        self.table.setRowCount(len(conspect))#кол-во строк = кол-ву конспектов
+        self.table.setHorizontalHeaderLabels(self.conspect[0].keys())#горизонтальные заголовки таблицы
+        self.table.setRowCount(len(self.conspect))#кол-во строк = кол-ву конспектов
 
         row = 0
-        for e in conspect:#добавление в таблицу
+        for e in self.conspect:#добавление в таблицу
             self.table.setItem(row, 0, QTableWidgetItem(e['предмет']))
             self.table.setItem(row, 1, QTableWidgetItem(e['название конспекта']))
             self.table.setItem(row, 2, QTableWidgetItem(e['ссылка']))
@@ -453,6 +454,21 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         delete_action.triggered.connect(self.delete)
         toolbar.addAction(delete_action)
         dock.setWidget(form)
+    
+    def add_employee(self):#добавление нового конспекта
+        if not self.valid():
+            return
+
+        row = self.table.rowCount()
+        self.table.insertRow(row)
+        self.table.setItem(row, 0, QTableWidgetItem(self.subject_name.text().strip()))
+        self.table.setItem(row, 1, QTableWidgetItem(self.conspect_name.text()))
+        self.table.setItem(row, 2, QTableWidgetItem(self.link.text()))
+        self.table.setItem(row, 3, QTableWidgetItem(self.age.text()))
+
+        self.reset()
+        
+        self.conspect.append({'предмет': self.subject_name.text().strip(), 'название конспекта': self.conspect_name.text(), 'ссылка': self.link.text(), 'дата': self.age.text()})
 
 
     def delete(self):#кнопка удаление конспекта
@@ -502,18 +518,6 @@ class Main_Window(QMainWindow):#окно с выбором предмета, о�
         self.link.clear()
         self.age.clear()
 
-    def add_employee(self):#добавление нового конспекта
-        if not self.valid():
-            return
-
-        row = self.table.rowCount()
-        self.table.insertRow(row)
-        self.table.setItem(row, 0, QTableWidgetItem(self.subject_name.text().strip()))
-        self.table.setItem(row, 1, QTableWidgetItem(self.conspect_name.text()))
-        self.table.setItem(row, 2, QTableWidgetItem(self.link.text()))
-        self.table.setItem(row, 3, QTableWidgetItem(self.age.text()))
-
-        self.reset()
 
 class Log_Window(QWidget):#окно регистрации
     def  __init__(self):
