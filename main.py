@@ -1,5 +1,6 @@
 import sqlite3
 import os
+
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 from datetime import datetime
@@ -85,7 +86,18 @@ def upload_to_drive():  # Функция загружает файл на мой
     folder_id = "1zVT6Fr6LzzqzXWO9RJdl8d89uQIIJew-"
     file_path = choose_file()
     gauth = GoogleAuth()
-    gauth.LocalWebserverAuth()  # откроет браузер для авторизации
+    # Попытка авторизации из локального файла токена
+    gauth.LoadCredentialsFile("mycreds.txt")
+    if gauth.credentials is None:
+        # Если токена нет — это единственный раз откроет браузер
+        gauth.LocalWebserverAuth()
+    elif gauth.access_token_expired:
+        # Если токен устарел — обновим
+        gauth.Refresh()
+    else:
+        gauth.Authorize()
+    # Сохраняем токен для последующих запусков
+    gauth.SaveCredentialsFile("mycreds.txt")
     drive = GoogleDrive(gauth)
     file_name = os.path.basename(file_path)
     gfile = drive.CreateFile({'title': file_name, 'parents': [{'id': folder_id}] if folder_id else []})
@@ -144,10 +156,10 @@ def download_inf_file_in_db(id_user: int, subject_name: str, date_note: str):  #
                                                 NAME_FILE TEXT
                                             )""")
     all_subject = [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME FROM SUBJECT""")]
-    if subject_name not in all_subject:
+    if subject_name.capitalize() not in all_subject:
         create_subject(subject_name.capitalize())
     subject_id = int(
-        [str(x)[1:-2] for x in cursor.execute(f"""SELECT ID_SUBJECT FROM SUBJECT WHERE NAME = '{subject_name}'""")][0])
+        [str(x)[1:-2] for x in cursor.execute(f"""SELECT ID_SUBJECT FROM SUBJECT WHERE NAME = '{subject_name.capitalize()}'""")][0])
     link, file_name = map(str, upload_to_drive())
     cursor.execute("""INSERT INTO DOWNLOADS
                                     VALUES(?, ?, ?, ?, ?, ?)""",
@@ -254,9 +266,60 @@ def all_info_files_user(id_user: int):
     return sp
 
 
+def delete_file(id_user, name_subject, name_file, link, date):
+    connect = sqlite3.connect('test.db')
+    cursor = connect.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
+                                                ID_USER INT,
+                                                ID_SUBJECT INT,     
+                                                DATE_UPLOAD DATETIME,
+                                                DATE_NOTE DATE,
+                                                LINK TEXT,
+                                                NAME_FILE TEXT
+                                            )""")
+    cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
+                                                ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
+                                                NAME TEXT UNIQUE
+                                            )""")
+    cursor.execute("SELECT ID_SUBJECT FROM SUBJECT WHERE NAME = ?", (name_subject,))
+    id_subject = [row[0] for row in cursor.fetchall()][0]
+    cursor.execute("""
+        DELETE FROM DOWNLOADS 
+        WHERE ID_USER = ? 
+        AND ID_SUBJECT = ? 
+        AND NAME_FILE = ? 
+        AND LINK = ? 
+        AND DATE_NOTE = ?
+    """, (id_user, id_subject, name_file, link, date))
+    connect.commit()
+    gauth = GoogleAuth()
+    # Попытка авторизации из локального файла токена
+    gauth.LoadCredentialsFile("mycreds.txt")
+    if gauth.credentials is None:
+        # Если токена нет — это единственный раз откроет браузер
+        gauth.LocalWebserverAuth()
+    elif gauth.access_token_expired:
+        # Если токен устарел — обновим
+        gauth.Refresh()
+    else:
+        gauth.Authorize()
+    # Сохраняем токен для последующих запусков
+    gauth.SaveCredentialsFile("mycreds.txt")
+    drive = GoogleDrive(gauth)
+    file_id = extract_file_id(link)
+    gfile = drive.CreateFile({'id': file_id})
+    gfile.Delete()
+    cursor.execute("SELECT ID_SUBJECT FROM DOWNLOADS")
+    id_subject = 2
+    all_id_subject = [row[0] for row in cursor.fetchall()]
+    if id_subject not in all_id_subject:
+        cursor.execute("""
+                DELETE FROM SUBJECT 
+                WHERE ID_SUBJECT = ? 
+                    """, (id_subject,))
+    connect.commit()
 # Пример использования
 # download_from_gdrive()
-# create_subject()
 # download_inf_file_in_db(k, subject_name, date_note)
 # print(upload_file_from_db())
 # create_account()

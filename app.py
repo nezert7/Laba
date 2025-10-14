@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLa
     QDockWidget, QFormLayout, QLineEdit, QWidget, QPushButton, QSpinBox, QMessageBox, QToolBar, QMessageBox
 from PyQt6.QtGui import QPixmap, QIcon, QAction
 from PyQt6.QtCore import Qt, QFile, QIODevice, QTextStream, QSize
-from main import create_account, login_system, all_name_subject, all_info_files_user, download_inf_file_in_db
+from main import create_account, login_system, all_name_subject, all_info_files_user, download_inf_file_in_db, delete_file
 
 USER_ID = 0
 
@@ -185,6 +185,7 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
 
             self.table.removeRow(current_row)
             if current_row < len(self.conspect):  # удаляем из списка conspect
+                delete_file(USER_ID, self.conspect[current_row]['предмет'], self.conspect[current_row]['название конспекта'], self.conspect[current_row]['ссылка'], self.conspect[current_row]['дата'])
                 self.conspect.pop(current_row)
 
             self.update_filter_combo()  # обновляем фильтр
