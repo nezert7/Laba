@@ -31,11 +31,11 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT(
                                         )""")
 
 
-def hash_password(password):  # Функция для хеширования паролей
+def hash_password(password: str):  # Функция для хеширования паролей
     return hashlib.sha256(password.encode()).hexdigest()
 
 
-def create_account(user_name, password):
+def create_account(user_name: str, password: str):
     connect = sqlite3.connect('test.db')
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS USERS( 
@@ -59,7 +59,7 @@ def create_account(user_name, password):
         return False
 
 
-def login_system(user_name, input_password):  # Функция для проверки логина и пароля под которыми входит пользователь
+def login_system(user_name: str, input_password: str):  # Функция для проверки логина и пароля под которыми входит пользователь
     connect = sqlite3.connect('test.db')
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS USERS( 
@@ -81,7 +81,9 @@ def login_system(user_name, input_password):  # Функция для прове
     return False, 0  # здесь нужна функция, которая выведет подобную ошибку на экран
 
 
-def upload_to_drive(file_path, folder_id):  # Функция загружает файл на мой гугл драйв
+def upload_to_drive():  # Функция загружает файл на мой гугл драйв
+    folder_id = "1zVT6Fr6LzzqzXWO9RJdl8d89uQIIJew-"
+    file_path = choose_file()
     gauth = GoogleAuth()
     gauth.LocalWebserverAuth()  # откроет браузер для авторизации
     drive = GoogleDrive(gauth)
@@ -90,16 +92,6 @@ def upload_to_drive(file_path, folder_id):  # Функция загружает 
     gfile.SetContentFile(file_path)
     gfile.Upload()
     return [f"https://drive.google.com/file/d/{gfile['id']}/view", file_name]
-
-
-# k = login_system()  # это id пользователя, который в системе
-k = 1
-
-
-# subject_name = input(
-#     "Введите имя предмета: ") # имя предмета, файл который будем добавлять, надо сделать отдельную функцию для ввода с приложения
-# date_note = input(
-#     "Введите дату: ") # дата конспекта, не когда он был загружен, а именно когда был урок например, тоже нужна отдельная функция для ввода с приложения
 
 
 def date_now():  # Здесь забирается актуальное время
@@ -119,10 +111,10 @@ def all_name_subject():
 
 
 def create_subject(new_subject):  # Функция для добавления в db новый предметов
-    cursor.execute("SELECT 1 FROM SUBJECT WHERE NAME = ?", (new_subject,))
+    cursor.execute("SELECT 1 FROM SUBJECT WHERE NAME = ?", (new_subject.capitalize(),))
     exists = cursor.fetchone()
     if not exists:
-        cursor.execute("INSERT INTO SUBJECT(NAME) VALUES (?)", (new_subject,))
+        cursor.execute("INSERT INTO SUBJECT(NAME) VALUES (?)", (new_subject.capitalize(),))
         connect.commit()
 
 
@@ -136,8 +128,7 @@ def choose_folder():
     return file_path
 
 
-def download_inf_file_in_db(id_user, subject_name,
-                            date_note):  # Функция для загрузки ссылки на файл и всей информации про файл в db
+def download_inf_file_in_db(id_user: int, subject_name: str, date_note: str):  # Функция для загрузки ссылки на файл и всей информации про файл в db
     connect = sqlite3.connect('test.db')
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
@@ -154,19 +145,17 @@ def download_inf_file_in_db(id_user, subject_name,
                                             )""")
     all_subject = [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME FROM SUBJECT""")]
     if subject_name not in all_subject:
-        create_subject(subject_name)
+        create_subject(subject_name.capitalize())
     subject_id = int(
         [str(x)[1:-2] for x in cursor.execute(f"""SELECT ID_SUBJECT FROM SUBJECT WHERE NAME = '{subject_name}'""")][0])
-    link, file_name = map(str, upload_to_drive(choose_file(),
-                                               folder_id="1zVT6Fr6LzzqzXWO9RJdl8d89uQIIJew-"))
+    link, file_name = map(str, upload_to_drive())
     cursor.execute("""INSERT INTO DOWNLOADS
                                     VALUES(?, ?, ?, ?, ?, ?)""",
                    (id_user, subject_id, date_now(), date_note, link, file_name))
     connect.commit()
 
 
-def upload_file_from_db(subject,
-                        name):  # Здесь мы выгружаем из db ссылку на файл который хотим открыть, присутствует сортировка по имени и дате
+def upload_file_from_db(subject, name):  # Здесь мы выгружаем из db ссылку на файл который хотим открыть, присутствует сортировка по имени и дате
     # date_create_start = input()  # Дата от которой ищем, нужна отдельная функция для ввода
     # date_create_end = input()  # Дата до которой ищем, нужна отдельная функция для ввода
     # Название предмета ссылку на конспект которого мы хотим получить, нужна отдельная функция для ввода
@@ -226,7 +215,7 @@ def all_name_files():
     return [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME_FILE FROM DOWNLOADS""")]
 
 
-def extract_file_id(url):
+def extract_file_id(url: str):
     if '/d/' in url:
         return url.split('/d/')[1].split('/')[0]
     elif 'id=' in url:
@@ -235,15 +224,13 @@ def extract_file_id(url):
         return None
 
 
-def download_from_gdrive():
+def download_from_gdrive(url: str, file_name: str):
     # Извлекаем ID файла
-    file_id = extract_file_id()
+    file_id = extract_file_id(url)
     url = f"https://drive.google.com/uc?id={file_id}"
-    file_name = "model.pdf"
     save_path = os.path.join(choose_folder(), file_name)
 
     gdown.download(url, save_path, quiet=False)
-
 
 # Пример использования
 # download_from_gdrive()
@@ -254,3 +241,4 @@ def download_from_gdrive():
 # download_inf_file_in_db(1, 'ОРГ', '13.10.2025')
 # print(upload_file_from_db('ОРГ', 'qeqe'))
 # print(all_name_files())
+# upload_to_drive()
