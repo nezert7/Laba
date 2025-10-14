@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLa
     QDockWidget, QFormLayout, QLineEdit, QWidget, QPushButton, QSpinBox, QMessageBox, QToolBar, QMessageBox
 from PyQt6.QtGui import QPixmap, QIcon, QAction
 from PyQt6.QtCore import Qt, QFile, QIODevice, QTextStream, QSize
-from main import create_account, login_system, all_name_subject, upload_to_drive, download_inf_file_in_db
+from main import create_account, login_system, all_name_subject, all_info_files_user, download_inf_file_in_db
 
 USER_ID = 0
 
@@ -19,20 +19,16 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
         self.initializeUI()
 
     def initializeUI(self):  # задача базовых настроек приложения
-        self.setGeometry(600, 200, 800, 600)  # 600, 200 - отступ при создании, 800, 600 - размер окна
+        self.setGeometry(600, 200, 900, 600)  # 600, 200 - отступ при создании, 800, 600 - размер окна
         self.setWindowTitle("главное окно")
         self.setUpMain_Window()
         self.show()
 
-    def setUpMain_Window(self):
-        self.conspect = [
-            {'предмет': 'матан', 'название конспекта': '1',
-             'ссылка': "https://www.pythontutorial.net/pyqt/pyqt-qtablewidget/", 'дата': 25},
-            {'предмет': 'орг', 'название конспекта': '1',
-             'ссылка': "https://www.pythontutorial.net/pyqt/pyqt-qtablewidget/", 'дата': 22},
-            {'предмет': 'матан', 'название конспекта': '1',
-             'ссылка': "https://www.pythontutorial.net/pyqt/pyqt-qtablewidget/", 'дата': 22},
-        ]  # список изначальных конспектов
+    def setUpMain_Window(self):  # список изначальных конспектов
+        sp = all_info_files_user(USER_ID)
+        for x in sp:
+            self.conspect.append({'предмет': x[0], 'название конспекта': x[1],
+                                  'ссылка': x[2], 'дата': x[3]})
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -157,7 +153,7 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
                         QMessageBox.critical(self, 'Error', f'не удалось открыть ссылку: {str(e)}')
 
     def add_employee(self):
-        global USER_ID# добавление нового конспекта
+        global USER_ID  # добавление нового конспекта
         if self.valid():
             download_inf_file_in_db(USER_ID, self.subject_name.text(), self.age.text())
 
