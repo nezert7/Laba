@@ -103,7 +103,7 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
 
             self.table.insertRow(row)
             self.table.setItem(row, 0, QTableWidgetItem(e['предмет']))
-            self.table.setItem(row, 1, QTableWidgetItem(e['название конспекта']))
+            # self.table.setItem(row, 1, QTableWidgetItem(e['название конспекта']))
 
             link_item = QTableWidgetItem(e['ссылка'])  # создаем ячейку для ссылки с особым оформлением
             link_item.setForeground(Qt.GlobalColor.blue)  # синий цвет для ссылки
@@ -118,7 +118,7 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
         self.filter_combo.clear()
         self.filter_combo.addItem("все предметы")
 
-        sp_subject = all_name_subject()
+        sp_subject = all_name_subject(USER_ID)
         subjects = set()  # собираем уникальные предметы
         for item in sp_subject:
             subjects.add(item)

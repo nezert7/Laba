@@ -86,6 +86,10 @@ def upload_to_drive():  # Функция загружает файл на мой
     folder_id = "1zVT6Fr6LzzqzXWO9RJdl8d89uQIIJew-"
     file_path = choose_file()
     gauth = GoogleAuth()
+    gauth.settings['get_refresh_token'] = True
+    gauth.settings['oauth_scope'] = [
+        'https://www.googleapis.com/auth/drive.file',
+        'https://www.googleapis.com/auth/drive']
     # Попытка авторизации из локального файла токена
     gauth.LoadCredentialsFile("mycreds.txt")
     if gauth.credentials is None:
@@ -112,14 +116,15 @@ def date_now():  # Здесь забирается актуальное врем
     return dt_string
 
 
-def all_name_subject():
+def all_name_subject(id_user):
     connect = sqlite3.connect('test.db')
     cursor = connect.cursor()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
-                                                ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
-                                                NAME TEXT UNIQUE
-                                            )""")
-    return [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME FROM SUBJECT""")]
+    cursor.execute(f"""SELECT ID_SUBJECT FROM DOWNLOADS WHERE ID_USER = ?""", (id_user,))
+    id_subject = [row[0] for row in cursor.fetchall()]
+    placeholders = ','.join(['?'] * len(id_subject))
+    cursor.execute(f"""SELECT NAME FROM SUBJECT WHERE ID_SUBJECT IN ({placeholders})""", id_subject)
+    names = [row[0] for row in cursor.fetchall()]
+    return names
 
 
 def create_subject(new_subject):  # Функция для добавления в db новый предметов
@@ -293,6 +298,10 @@ def delete_file(id_user, name_subject, name_file, link, date):
     """, (id_user, id_subject, name_file, link, date))
     connect.commit()
     gauth = GoogleAuth()
+    gauth.settings['get_refresh_token'] = True
+    gauth.settings['oauth_scope'] = [
+        'https://www.googleapis.com/auth/drive.file',
+        'https://www.googleapis.com/auth/drive']
     # Попытка авторизации из локального файла токена
     gauth.LoadCredentialsFile("mycreds.txt")
     if gauth.credentials is None:
@@ -327,3 +336,4 @@ def delete_file(id_user, name_subject, name_file, link, date):
 # print(upload_file_from_db('ОРГ', 'qeqe'))
 # print(all_name_files())
 # upload_to_drive()
+# print(all_name_subject(1))
