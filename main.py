@@ -60,7 +60,8 @@ def create_account(user_name: str, password: str):
         return False
 
 
-def login_system(user_name: str, input_password: str):  # Функция для проверки логина и пароля под которыми входит пользователь
+def login_system(user_name: str,
+                 input_password: str):  # Функция для проверки логина и пароля под которыми входит пользователь
     connect = sqlite3.connect('test.db')
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS USERS( 
@@ -145,7 +146,8 @@ def choose_folder():
     return file_path
 
 
-def download_inf_file_in_db(id_user: int, subject_name: str, date_note: str):  # Функция для загрузки ссылки на файл и всей информации про файл в db
+def download_inf_file_in_db(id_user: int, subject_name: str,
+                            date_note: str):  # Функция для загрузки ссылки на файл и всей информации про файл в db
     connect = sqlite3.connect('test.db')
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
@@ -164,15 +166,19 @@ def download_inf_file_in_db(id_user: int, subject_name: str, date_note: str):  #
     if subject_name.capitalize() not in all_subject:
         create_subject(subject_name.capitalize())
     subject_id = int(
-        [str(x)[1:-2] for x in cursor.execute(f"""SELECT ID_SUBJECT FROM SUBJECT WHERE NAME = '{subject_name.capitalize()}'""")][0])
+        [str(x)[1:-2] for x in
+         cursor.execute(f"""SELECT ID_SUBJECT FROM SUBJECT WHERE NAME = '{subject_name.capitalize()}'""")][0])
     link, file_name = map(str, upload_to_drive())
+    dt = date_now()
     cursor.execute("""INSERT INTO DOWNLOADS
                                     VALUES(?, ?, ?, ?, ?, ?)""",
-                   (id_user, subject_id, date_now(), date_note, link, file_name))
+                   (id_user, subject_id, dt, date_note, link, file_name))
     connect.commit()
+    return link, dt, file_name
 
 
-def upload_file_from_db(subject, name):  # Здесь мы выгружаем из db ссылку на файл который хотим открыть, присутствует сортировка по имени и дате
+def upload_file_from_db(subject,
+                        name):  # Здесь мы выгружаем из db ссылку на файл который хотим открыть, присутствует сортировка по имени и дате
     # date_create_start = input()  # Дата от которой ищем, нужна отдельная функция для ввода
     # date_create_end = input()  # Дата до которой ищем, нужна отдельная функция для ввода
     # Название предмета ссылку на конспект которого мы хотим получить, нужна отдельная функция для ввода
@@ -265,9 +271,11 @@ def all_info_files_user(id_user: int):
                                                 ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
                                                 NAME TEXT UNIQUE
                                             )""")
-    sp = [list(x) for x in cursor.execute(f"""SELECT ID_SUBJECT, NAME_FILE, LINK, DATE_NOTE FROM DOWNLOADS WHERE ID_USER = '{id_user}'""")]
+    sp = [list(x) for x in cursor.execute(
+        f"""SELECT ID_SUBJECT, NAME_FILE, LINK, DATE_NOTE, DATE_UPLOAD FROM DOWNLOADS WHERE ID_USER = '{id_user}'""")]
     for x in sp:
-        x[0] = ''.join([str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME FROM SUBJECT WHERE ID_SUBJECT = '{x[0]}'""")])
+        x[0] = ''.join(
+            [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME FROM SUBJECT WHERE ID_SUBJECT = '{x[0]}'""")])
     return sp
 
 
