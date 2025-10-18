@@ -170,7 +170,7 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
             return
         file_name = self.ui.table.item(row, 4).text()
         link = self.ui.table.item(row, 1).text()
-        QMessageBox.information(self, 'Скачивание', f'Скачивание файла:\n{link}')
+        QMessageBox.information(self, 'Скачивание', f'Скачивание файла:\n{file_name}')
         download_from_gdrive(link, file_name)
         # тут можно добавить логику скачивания по ссылке
 

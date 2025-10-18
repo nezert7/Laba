@@ -1,15 +1,35 @@
 import sqlite3
 import os
+import sys
 
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 from datetime import datetime
 from tkinter import filedialog
+from pathlib import Path
 import hashlib
-import gdown
 
-connect = sqlite3.connect('test.db')
+def get_app_path():
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    else:
+        return os.path.dirname(os.path.abspath(__file__))
+
+
+def resource_path(relative_path):
+    base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+
+
+APP_PATH = get_app_path()
+DB_PATH = os.path.join(APP_PATH, "test.db")
+TOKEN_PATH = os.path.join(APP_PATH, "mycreds.txt")
+CLIENT_SECRETS_PATH = resource_path("client_secrets.json")
+
+connect = sqlite3.connect(DB_PATH)
 cursor = connect.cursor()
+# cursor.execute("""DROP TABLE IF EXISTS USERS""")
+# cursor.execute("""DROP TABLE IF EXISTS DOWNLOADS""")
 # cursor.execute("""DROP TABLE IF EXISTS SUBJECT""")
 cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
                                             ID_USER INT,
@@ -37,7 +57,7 @@ def hash_password(password: str):  # Функция для хешировани�
 
 
 def create_account(user_name: str, password: str):
-    connect = sqlite3.connect('test.db')
+    connect = sqlite3.connect(DB_PATH)
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS USERS( 
                                                 ID_USERS INTEGER PRIMARY KEY AUTOINCREMENT,     
@@ -62,7 +82,7 @@ def create_account(user_name: str, password: str):
 
 def login_system(user_name: str,
                  input_password: str):  # Функция для проверки логина и пароля под которыми входит пользователь
-    connect = sqlite3.connect('test.db')
+    connect = sqlite3.connect(DB_PATH)
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS USERS( 
                                                     ID_USERS INTEGER PRIMARY KEY AUTOINCREMENT,     
@@ -90,19 +110,22 @@ def upload_to_drive():  # Функция загружает файл на мой
     gauth.settings['get_refresh_token'] = True
     gauth.settings['oauth_scope'] = [
         'https://www.googleapis.com/auth/drive.file',
-        'https://www.googleapis.com/auth/drive']
-    # Попытка авторизации из локального файла токена
-    gauth.LoadCredentialsFile("mycreds.txt")
+        'https://www.googleapis.com/auth/drive'
+    ]
+    gauth.LoadClientConfigFile(CLIENT_SECRETS_PATH)
+
+    if os.path.exists(TOKEN_PATH):
+        gauth.LoadCredentialsFile(TOKEN_PATH)
     if gauth.credentials is None:
-        # Если токена нет — это единственный раз откроет браузер
-        gauth.LocalWebserverAuth()
+        gauth.LocalWebserverAuth()  # один раз откроется браузер
     elif gauth.access_token_expired:
-        # Если токен устарел — обновим
         gauth.Refresh()
     else:
         gauth.Authorize()
-    # Сохраняем токен для последующих запусков
-    gauth.SaveCredentialsFile("mycreds.txt")
+
+    # Сохраняем токен рядом с exe
+    gauth.SaveCredentialsFile(TOKEN_PATH)
+
     drive = GoogleDrive(gauth)
     file_name = os.path.basename(file_path)
     gfile = drive.CreateFile({'title': file_name, 'parents': [{'id': folder_id}] if folder_id else []})
@@ -118,7 +141,7 @@ def date_now():  # Здесь забирается актуальное врем
 
 
 def all_name_subject(id_user):
-    connect = sqlite3.connect('test.db')
+    connect = sqlite3.connect(DB_PATH)
     cursor = connect.cursor()
     cursor.execute(f"""SELECT ID_SUBJECT FROM DOWNLOADS WHERE ID_USER = ?""", (id_user,))
     id_subject = [row[0] for row in cursor.fetchall()]
@@ -129,10 +152,11 @@ def all_name_subject(id_user):
 
 
 def create_subject(new_subject):  # Функция для добавления в db новый предметов
-    cursor.execute("SELECT 1 FROM SUBJECT WHERE NAME = ?", (new_subject.capitalize(),))
+    new_subject = new_subject.capitalize()
+    cursor.execute("SELECT 1 FROM SUBJECT WHERE NAME = ?", (new_subject,))
     exists = cursor.fetchone()
     if not exists:
-        cursor.execute("INSERT INTO SUBJECT(NAME) VALUES (?)", (new_subject.capitalize(),))
+        cursor.execute("INSERT INTO SUBJECT(NAME) VALUES (?)", (new_subject,))
         connect.commit()
 
 
@@ -148,7 +172,7 @@ def choose_folder():
 
 def download_inf_file_in_db(id_user: int, subject_name: str,
                             date_note: str):  # Функция для загрузки ссылки на файл и всей информации про файл в db
-    connect = sqlite3.connect('test.db')
+    connect = sqlite3.connect(DB_PATH)
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
                                                 ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
@@ -163,11 +187,12 @@ def download_inf_file_in_db(id_user: int, subject_name: str,
                                                 NAME_FILE TEXT
                                             )""")
     all_subject = [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME FROM SUBJECT""")]
-    if subject_name.capitalize() not in all_subject:
-        create_subject(subject_name.capitalize())
+    subject_name = subject_name.capitalize()
+    if subject_name not in all_subject:
+        create_subject(subject_name)
     subject_id = int(
         [str(x)[1:-2] for x in
-         cursor.execute(f"""SELECT ID_SUBJECT FROM SUBJECT WHERE NAME = '{subject_name.capitalize()}'""")][0])
+         cursor.execute(f"""SELECT ID_SUBJECT FROM SUBJECT WHERE NAME = '{subject_name}'""")][0])
     link, file_name = map(str, upload_to_drive())
     dt = date_now()
     cursor.execute("""INSERT INTO DOWNLOADS
@@ -182,7 +207,7 @@ def upload_file_from_db(subject,
     # date_create_start = input()  # Дата от которой ищем, нужна отдельная функция для ввода
     # date_create_end = input()  # Дата до которой ищем, нужна отдельная функция для ввода
     # Название предмета ссылку на конспект которого мы хотим получить, нужна отдельная функция для ввода
-    connect = sqlite3.connect('test.db')
+    connect = sqlite3.connect(DB_PATH)
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
                                                     ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
@@ -225,7 +250,7 @@ def upload_file_from_db(subject,
 
 
 def all_name_files():
-    connect = sqlite3.connect('test.db')
+    connect = sqlite3.connect(DB_PATH)
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
                                                 ID_USER INT,
@@ -249,15 +274,40 @@ def extract_file_id(url: str):
 
 def download_from_gdrive(url: str, file_name: str):
     # Извлекаем ID файла
+    save_folder = choose_folder()
+    Path(save_folder).mkdir(parents=True, exist_ok=True)
     file_id = extract_file_id(url)
-    url = f"https://drive.google.com/uc?id={file_id}"
-    save_path = os.path.join(choose_folder(), file_name)
+    if not file_id:
+        raise ValueError("Неверный URL Google Drive")
 
-    gdown.download(url, save_path, quiet=False)
+    gauth = GoogleAuth()
+    gauth.settings['get_refresh_token'] = True
+    gauth.settings['oauth_scope'] = [
+        'https://www.googleapis.com/auth/drive.file',
+        'https://www.googleapis.com/auth/drive'
+    ]
+    gauth.LoadClientConfigFile(CLIENT_SECRETS_PATH)
+    if os.path.exists(TOKEN_PATH):
+        gauth.LoadCredentialsFile(TOKEN_PATH)
+
+    if gauth.credentials is None:
+        gauth.LocalWebserverAuth()
+    elif gauth.access_token_expired:
+        gauth.Refresh()
+    else:
+        gauth.Authorize()
+
+    gauth.SaveCredentialsFile(TOKEN_PATH)
+    drive = GoogleDrive(gauth)
+    gfile = drive.CreateFile({'id': file_id})
+    file_name = gfile['title']
+    save_path = os.path.join(save_folder, file_name)
+    gfile.GetContentFile(save_path)  # Надёжно работает в exe
+    return save_path  # Надёжно работает в exe
 
 
 def all_info_files_user(id_user: int):
-    connect = sqlite3.connect('test.db')
+    connect = sqlite3.connect(DB_PATH)
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
                                                 ID_USER INT,
@@ -280,7 +330,7 @@ def all_info_files_user(id_user: int):
 
 
 def delete_file(id_user, name_subject, name_file, link, date):
-    connect = sqlite3.connect('test.db')
+    connect = sqlite3.connect(DB_PATH)
     cursor = connect.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
                                                 ID_USER INT,
@@ -309,19 +359,26 @@ def delete_file(id_user, name_subject, name_file, link, date):
     gauth.settings['get_refresh_token'] = True
     gauth.settings['oauth_scope'] = [
         'https://www.googleapis.com/auth/drive.file',
-        'https://www.googleapis.com/auth/drive']
-    # Попытка авторизации из локального файла токена
-    gauth.LoadCredentialsFile("mycreds.txt")
+        'https://www.googleapis.com/auth/drive'
+    ]
+
+    # Загружаем client_secrets.json
+    gauth.LoadClientConfigFile(CLIENT_SECRETS_PATH)
+
+    # Загружаем токен
+    if os.path.exists(TOKEN_PATH):
+        gauth.LoadCredentialsFile(TOKEN_PATH)
+
     if gauth.credentials is None:
-        # Если токена нет — это единственный раз откроет браузер
-        gauth.LocalWebserverAuth()
+        gauth.LocalWebserverAuth()  # один раз откроется браузер
     elif gauth.access_token_expired:
-        # Если токен устарел — обновим
         gauth.Refresh()
     else:
         gauth.Authorize()
-    # Сохраняем токен для последующих запусков
-    gauth.SaveCredentialsFile("mycreds.txt")
+
+    # Сохраняем токен рядом с exe
+    gauth.SaveCredentialsFile(TOKEN_PATH)
+
     drive = GoogleDrive(gauth)
     file_id = extract_file_id(link)
     gfile = drive.CreateFile({'id': file_id})
@@ -335,13 +392,3 @@ def delete_file(id_user, name_subject, name_file, link, date):
                 WHERE ID_SUBJECT = ? 
                     """, (id_subject,))
     connect.commit()
-# Пример использования
-# download_from_gdrive()
-# download_inf_file_in_db(k, subject_name, date_note)
-# print(upload_file_from_db())
-# create_account()
-# download_inf_file_in_db(1, 'ОРГ', '13.10.2025')
-# print(upload_file_from_db('ОРГ', 'qeqe'))
-# print(all_name_files())
-# upload_to_drive()
-# print(all_name_subject(1))
