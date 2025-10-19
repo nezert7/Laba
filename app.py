@@ -9,7 +9,7 @@ from PyQt6.QtCore import Qt, QFile, QIODevice, QTextStream, QSize
 from main import create_account, login_system, all_name_subject, all_info_files_user, download_inf_file_in_db, delete_file, download_from_gdrive
 from log_window import Ui_MainWindow
 from reg_window import Ui_LogWindow
-from main_window import Ui_Con_Window
+from new_main_window import Ui_Con_Window
 
 USER_ID = 0
 
