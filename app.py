@@ -6,7 +6,10 @@ from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLa
     QDockWidget, QFormLayout, QLineEdit, QWidget, QPushButton, QSpinBox, QMessageBox, QToolBar, QMessageBox
 from PyQt6.QtGui import QPixmap, QIcon, QAction
 from PyQt6.QtCore import Qt, QFile, QIODevice, QTextStream, QSize
-from main import create_account, login_system, all_name_subject, all_info_files_user, download_inf_file_in_db, delete_file
+from main import create_account, login_system, all_name_subject, all_info_files_user, download_inf_file_in_db, delete_file, download_from_gdrive
+from log_window import Ui_MainWindow
+from reg_window import Ui_LogWindow
+from main_window import Ui_Con_Window
 
 USER_ID = 0
 
@@ -15,270 +18,191 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
     def __init__(self):
         super().__init__()
         self.conspect = []
-        self.firs_window = First_Window
-        self.initializeUI()
+        self.ui = Ui_Con_Window()
+        self.ui.setupUi(self)
 
-    def initializeUI(self):  # задача базовых настроек приложения
-        self.setGeometry(600, 200, 900, 600)  # 600, 200 - отступ при создании, 800, 600 - размер окна
-        self.setWindowTitle("главное окно")
-        self.setUpMain_Window()
+        # Настройки окна
+        self.setGeometry(400, 100, 1394, 791)
+        self.setWindowTitle("Главное окно")
+
+        # Подключение сигналов
+        self.ui.filter_label.currentTextChanged.connect(self.apply_filter)
+        self.ui.pushButton_4.clicked.connect(self.download_selected)  # кнопка "Скачать"
+        self.ui.delete_action.clicked.connect(self.delete_selected)   # кнопка "Удалить"
+        self.ui.btn_add.clicked.connect(self.add_conspect)           # кнопка "Добавить"
+        self.ui.pushButton_6.clicked.connect(self.go_back)           # кнопка "Назад"
+
+        self.ui.table.cellClicked.connect(self.on_cell_clicked)
+
+        # Загружаем данные
+        self.load_conspects()
+        self.update_filter_combo()
+
         self.show()
 
-    def setUpMain_Window(self):  # список изначальных конспектов
+    # 🟡 Загружаем данные конспектов пользователя
+    def load_conspects(self):
+        self.conspect.clear()
         sp = all_info_files_user(USER_ID)
         for x in sp:
-            self.conspect.append({'предмет': x[0], 'название конспекта': x[1],
-                                  'ссылка': x[2], 'дата': x[3]})
+            self.conspect.append({
+                'предмет': x[0],
+                'ссылка': x[2],
+                'дата занятия': x[3],
+                'дата загрузки': x[4],
+                'имя файла': x[1],
+            })
+        self.populate_table()
 
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        main_layout = QVBoxLayout(central_widget)
-
-        filter_layout = QHBoxLayout()
-
-        filter_label = QLabel("Фильтр по предмету:")
-        self.filter_combo = QComboBox()
-        self.filter_combo.addItem("все предметы")
-        self.filter_combo.currentTextChanged.connect(self.apply_filter)
-
-        filter_layout.addWidget(filter_label)
-        filter_layout.addWidget(self.filter_combo)
-        filter_layout.addStretch()
-
-        main_layout.addLayout(filter_layout)
-
-        self.table = QTableWidget()
-        main_layout.addWidget(self.table)
-
-        self.table.setColumnCount(4)  # кол-во столбцов
-        self.table.setColumnWidth(0, 150)  # настройка ширины столбцов
-        self.table.setColumnWidth(1, 150)  # настройка ширины столбцов
-        self.table.setColumnWidth(2, 300)  # настройка ширины столбцов
-        self.table.setColumnWidth(3, 50)  # настройка ширины столбцов
-
-        self.table.setHorizontalHeaderLabels(
-            ['предмет', 'название конспекта', 'ссылка', 'дата'])  # горизонтальные заголовки таблицы
-
-        self.populate_table()  # заполняем таблицу данными
-
-        self.update_filter_combo()  # обновляем комбобокс фильтра
-
-        self.table.cellClicked.connect(self.on_cell_clicked)  # подключаем обработчик кликов по ячейкам
-
-        dock = QDockWidget('добавить конспект')
-        dock.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
-
-        form = QWidget()
-        layout = QFormLayout(form)
-        form.setLayout(layout)
-
-        self.subject_name = QLineEdit(form)
-        self.age = QSpinBox(form, minimum=1, maximum=31)
-        self.age.clear()
-
-        layout.addRow('предмет:', self.subject_name)
-        layout.addRow('дата (день):', self.age)
-
-        btn_add = QPushButton('добавить')
-        btn_add.clicked.connect(self.add_employee)
-        layout.addRow(btn_add)
-
-        toolbar = QToolBar('main toolbar')
-        toolbar.setIconSize(QSize(16, 16))
-        self.addToolBar(toolbar)
-
-        delete_action = QAction('&Delete', self)
-        delete_action.triggered.connect(self.delete)
-        toolbar.addAction(delete_action)
-        dock.setWidget(form)
-
-    def populate_table(self, filter_subject=None):  # заполняет таблицу данными с учетом фильтра
-        self.table.setRowCount(0)  # очищаем таблицу
-
+    # 🟡 Заполняем таблицу
+    def populate_table(self, filter_subject=None):
+        self.ui.table.setRowCount(0)
         row = 0
-        for e in self.conspect:  # применяем фильтр, если он задан
-            if filter_subject and filter_subject != "все предметы" and e['предмет'] != filter_subject:
+        for e in self.conspect:
+            if filter_subject and filter_subject != "Выберите или введите предмет" and e['предмет'] != filter_subject:
                 continue
 
-            self.table.insertRow(row)
-            self.table.setItem(row, 0, QTableWidgetItem(e['предмет']))
-            # self.table.setItem(row, 1, QTableWidgetItem(e['название конспекта']))
+            self.ui.table.insertRow(row)
+            self.ui.table.setItem(row, 0, QTableWidgetItem(e['предмет']))
 
-            link_item = QTableWidgetItem(e['ссылка'])  # создаем ячейку для ссылки с особым оформлением
-            link_item.setForeground(Qt.GlobalColor.blue)  # синий цвет для ссылки
-            link_item.setToolTip(f"Нажмите чтобы открыть: {e['ссылка']}")  # подсказка
-            self.table.setItem(row, 2, link_item)
-
-            self.table.setItem(row, 3, QTableWidgetItem(str(e['дата'])))
+            link_item = QTableWidgetItem(e['ссылка'])
+            link_item.setForeground(Qt.GlobalColor.blue)
+            link_item.setToolTip(f"Нажмите чтобы открыть: {e['ссылка']}")
+            self.ui.table.setItem(row, 1, link_item)
+            self.ui.table.setItem(row, 4, QTableWidgetItem(str(e['имя файла'])))
+            self.ui.table.setItem(row, 2, QTableWidgetItem(str(e['дата занятия'])))
+            self.ui.table.setItem(row, 3, QTableWidgetItem(str(e['дата загрузки'])))
             row += 1
 
-    def update_filter_combo(self):  # обновляет список предметов в комбобоксе фильтра
-        current_filter = self.filter_combo.currentText()
-        self.filter_combo.clear()
-        self.filter_combo.addItem("все предметы")
+    # 🟡 Обновление фильтра
+    def update_filter_combo(self):
+        current = self.ui.filter_label.currentText()
+        self.ui.filter_label.clear()
+        self.ui.filter_label.addItem("Выберите или введите предмет")
 
-        sp_subject = all_name_subject(USER_ID)
-        subjects = set()  # собираем уникальные предметы
-        for item in sp_subject:
-            subjects.add(item)
+        subjects = set(item for item in all_name_subject(USER_ID))
+        for s in sorted(subjects):
+            self.ui.filter_label.addItem(s)
 
-        for subject in sorted(subjects):  # добавляем предметы в комбобокс
-            self.filter_combo.addItem(subject)
-
-        if current_filter in [self.filter_combo.itemText(i) for i in
-                              range(
-                                  self.filter_combo.count())]:  # восстанавливаем предыдущий фильтр, если он еще существует
-            self.filter_combo.setCurrentText(current_filter)
+        if current in [self.ui.filter_label.itemText(i) for i in range(self.ui.filter_label.count())]:
+            self.ui.filter_label.setCurrentText(current)
         else:
-            self.filter_combo.setCurrentText("все предметы")
+            self.ui.filter_label.setCurrentIndex(0)
 
-    def apply_filter(self, subject):  # применяет фильтр по выбранному предмету
-        if subject == "все предметы":
-            self.populate_table()  # показываем все записи
+    # 🟡 Применение фильтра
+    def apply_filter(self, subject):
+        if subject == "Выберите или введите предмет":
+            self.populate_table()
         else:
-            self.populate_table(subject)  # показываем только выбранный предмет
+            self.populate_table(subject)
 
-    def on_cell_clicked(self, row, column):  # обработчик клика по ячейке таблицы
-        if column == 2:  # только для столбца со ссылками
-            item = self.table.item(row, column)
+    # 🟡 Клик по ссылке
+    def on_cell_clicked(self, row, column):
+        if column == 1:
+            item = self.ui.table.item(row, column)
             if item and item.text().startswith(('http://', 'https://')):
-                reply = QMessageBox.question(self, 'открыть ссылку', f'вы хотите открыть ссылку:\n{item.text()}',
-                                             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)  # Спрашиваем подтверждение перед открытием
+                reply = QMessageBox.question(
+                    self,
+                    'Открыть ссылку',
+                    f'Вы хотите открыть ссылку:\n{item.text()}',
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                )
                 if reply == QMessageBox.StandardButton.Yes:
                     try:
                         webbrowser.open(item.text())
-                        QMessageBox.information(self, 'успешно', 'ссылка открывается в браузере')
+                        QMessageBox.information(self, 'Успешно', 'Ссылка открывается в браузере')
                     except Exception as e:
-                        QMessageBox.critical(self, 'Error', f'не удалось открыть ссылку: {str(e)}')
+                        QMessageBox.critical(self, 'Ошибка', f'Не удалось открыть ссылку: {str(e)}')
 
-    def add_employee(self):
-        global USER_ID  # добавление нового конспекта
-        if self.valid():
-            download_inf_file_in_db(USER_ID, self.subject_name.text(), self.age.text())
+    # 🟡 Добавление нового конспекта
+    def add_conspect(self):
+        subject = self.ui.subject_name.text().strip()
+        date = self.ui.age.text().strip()
 
-        row = self.table.rowCount()
-        self.table.insertRow(row)
-        self.table.setItem(row, 0, QTableWidgetItem(self.subject_name.text().strip()))
+        if not subject or not date:
+            QMessageBox.warning(self, 'Ошибка', 'Заполните все поля')
+            return
 
-        self.table.setItem(row, 3, QTableWidgetItem(self.age.text()))
+        # добавляем в базу
+        link, dt, file_name = download_inf_file_in_db(USER_ID, subject, date)
 
-        new_conspect = {'предмет': self.subject_name.text().strip(), 'дата': self.age.text()}
-        self.conspect.append(new_conspect)
+        # обновляем локально
+        self.conspect.append({
+            'предмет': subject,
+            'ссылка': link,
+            'дата занятия': date,
+            'дата загрузки': dt,
+            'имя файла': file_name
+        })
+        self.update_filter_combo()
+        self.apply_filter(self.ui.filter_label.currentText())
 
-        self.update_filter_combo()  # обновляем фильтр и применяем текущий
-        current_filter = self.filter_combo.currentText()
-        if current_filter == "все предметы" or current_filter == new_conspect['предмет']:
-            self.apply_filter(current_filter)
+        self.ui.subject_name.clear()
+        self.ui.age.clear()
 
-        self.reset()
+    # 🟡 Удаление выбранной строки
+    def delete_selected(self):
+        row = self.ui.table.currentRow()
+        if row < 0:
+            QMessageBox.warning(self, 'Ошибка', 'Выберите строку для удаления')
+            return
 
-    def delete(self):  # кнопка удаление конспекта
-        current_row = self.table.currentRow()
-        if current_row < 0:
-            return QMessageBox.warning(self, 'Error', 'выберите строку, чтоб удалить')
+        subject = self.ui.table.item(row, 0).text()
+        name_file = self.ui.table.item(row, 4).text()
+        link = self.ui.table.item(row, 1).text()
+        date = self.ui.table.item(row, 2).text()
 
-        button = QMessageBox.question(self, 'Error', 'вы уверены, что хотите удалить выбранную строку?',
-                                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        if button == QMessageBox.StandardButton.Yes:  # получаем предмет удаляемой строки для обновления фильтра
-            deleted_subject = self.table.item(current_row, 0).text()
+        reply = QMessageBox.question(
+            self, 'Удаление', f'Удалить конспект по предмету "{subject}"?',
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            delete_file(USER_ID, subject, name_file, link, date)
+            self.conspect.pop(row)
+            self.ui.table.removeRow(row)
+            self.update_filter_combo()
 
-            self.table.removeRow(current_row)
-            if current_row < len(self.conspect):  # удаляем из списка conspect
-                delete_file(USER_ID, self.conspect[current_row]['предмет'], self.conspect[current_row]['название конспекта'], self.conspect[current_row]['ссылка'], self.conspect[current_row]['дата'])
-                self.conspect.pop(current_row)
+    # 🟡 Скачать выбранный файл (пример)
+    def download_selected(self):
+        row = self.ui.table.currentRow()
+        if row < 0:
+            QMessageBox.warning(self, 'Ошибка', 'Выберите конспект для скачивания')
+            return
+        file_name = self.ui.table.item(row, 4).text()
+        link = self.ui.table.item(row, 1).text()
+        QMessageBox.information(self, 'Скачивание', f'Скачивание файла:\n{file_name}')
+        download_from_gdrive(link, file_name)
+        # тут можно добавить логику скачивания по ссылке
 
-            self.update_filter_combo()  # обновляем фильтр
-            current_filter = self.filter_combo.currentText()
-            self.apply_filter(current_filter)
-        return None
-
-    def valid(self):
-        subject_name = self.subject_name.text().strip()
-
-        if not subject_name:
-            QMessageBox.critical(self, 'Error', 'пожалуйста добавьте название предмета')
-            self.subject_name.setFocus()
-            return False
-        try:
-            age = int(self.age.text().strip())
-        except ValueError:
-            QMessageBox.critical(self, 'Error', 'пожалуйста добавьте дату создания конспекта')
-            self.age.setFocus()
-            return False
-
-        if age <= 0 or age > 31:
-            QMessageBox.critical(self, 'Error', 'дата должна быть числом от 1 до 31')
-            self.age.setFocus()
-            return False
-
-        return True
-
-    def reset(self):
-        self.subject_name.clear()
-        self.age.clear()
+    # 🟡 Назад
+    def go_back(self):
+        self.hide()
+        self.first_window = First_Window()
+        self.first_window.show()
 
 
-class Log_Window(QWidget):  # окно регистрации
-
+class Log_Window(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.initializeUI()
+        self.ui = Ui_LogWindow()
+        self.ui.setupUi(self)
 
-    def initializeUI(self):  # задача базовых настроек приложения
-        self.setGeometry(600, 200, 800, 600)  # 600, 200 - отступ при создании, 800, 600 - размер окна
-        self.setWindowTitle("регистрация")
-        self.setUpLog_Window()
+        # Базовые настройки окна
+        self.setGeometry(600, 200, 800, 600)
+        self.setWindowTitle("Регистрация")
+
+        # Подключение сигналов
+        self.ui.log_button.clicked.connect(self.process_registration)
+        self.ui.exit_button.clicked.connect(self.goto_ScreenFirst)
+        self.ui.toggle_button.clicked.connect(self.toggle_password_visibility)
+        self.ui.toggle_button_2.clicked.connect(self.toggle_password_visibility2)
+
         self.show()
 
-    def setUpLog_Window(self):
-        main_v_box = QVBoxLayout()
-        self.input_logr = QLineEdit(self)
-        self.input_logr.setPlaceholderText("Придумайте логин")
-
-        self.input_pasr = QLineEdit(self)
-        self.input_pasr.setEchoMode(QLineEdit.EchoMode.Password)
-        self.input_pasr.setPlaceholderText("Придумайте пароль")
-
-        self.input_pasr2 = QLineEdit(self)
-        self.input_pasr2.setEchoMode(QLineEdit.EchoMode.Password)
-        self.input_pasr2.setPlaceholderText("Повторите пароль")
-
-        self.toggle_button = QPushButton("👁️")
-        self.toggle_button.setCheckable(True)
-        self.toggle_button.setFixedSize(QSize(24, 24))
-        self.toggle_button.clicked.connect(self.toggle_password_visibility)
-        self.toggle_button2 = QPushButton("👁️")
-        self.toggle_button2.setCheckable(True)
-        self.toggle_button2.setFixedSize(QSize(24, 24))
-        self.toggle_button2.clicked.connect(self.toggle_password_visibility2)
-
-        self.log_button = QPushButton("зарегистрироваться", self)
-        self.log_button.clicked.connect(self.process_registration)
-
-        self.exit_button = QPushButton("назад", self)
-        self.exit_button.clicked.connect(self.goto_MainWindow)
-
-        logr_h_box = QHBoxLayout()
-        pasr_h_box = QHBoxLayout()
-        pasr2_h_box = QHBoxLayout()
-        logr_h_box.addWidget(self.input_logr)
-        pasr_h_box.addWidget(self.input_pasr)
-        pasr_h_box.addWidget(self.toggle_button)
-        pasr2_h_box.addWidget(self.input_pasr2)
-        pasr2_h_box.addWidget(self.toggle_button2)
-        main_v_box.addLayout(logr_h_box)
-        main_v_box.addLayout(pasr_h_box)
-        main_v_box.addLayout(pasr2_h_box)
-        main_v_box.addWidget(self.log_button)
-        main_v_box.addWidget(self.exit_button)
-
-        self.setLayout(main_v_box)
-
-    def validate_registration_data(self):  # Проверяет валидность данных для регистрации
-        username = self.input_logr.text().strip()
-        password = self.input_pasr.text().strip()
-        password_confirm = self.input_pasr2.text().strip()
+    def validate_registration_data(self):  # Проверка данных
+        username = self.ui.input_logr.text().strip()
+        password = self.ui.input_pasr.text().strip()
+        password_confirm = self.ui.input_pasr2.text().strip()
 
         if not username or not password or not password_confirm:
             return False, "Все поля должны быть заполнены"
@@ -288,85 +212,53 @@ class Log_Window(QWidget):  # окно регистрации
             return False, "Такой пользователь уже существует"
         return True, ""
 
-    def process_registration(self):  # Обрабатывает нажатие кнопки регистрации
+    def process_registration(self):  # Обработка нажатия кнопки
         is_valid, message = self.validate_registration_data()
         if is_valid:
-            self.close()
-            self.goto_MainWindow()
+            QMessageBox.information(self, "Успех", "Аккаунт успешно создан")
+            self.goto_ScreenFirst()
         else:
             QMessageBox.warning(self, "Ошибка регистрации", message)
 
-    def goto_ScreenFirst(self):  # переход на окно входа
-        self.hide()
-        self.screen_log = First_Window()
-        self.screen_log.show()
-
-    def goto_MainWindow(self):  # функция перехода на главное окно
+    def goto_ScreenFirst(self):  # Возврат на окно авторизации
         self.hide()
         self.screen_first = First_Window()
         self.screen_first.show()
 
     def toggle_password_visibility(self):
-        if self.toggle_button.isChecked():
-            self.input_pasr.setEchoMode(QLineEdit.EchoMode.Normal)
+        if self.ui.input_pasr.echoMode() == QLineEdit.EchoMode.Password:
+            self.ui.input_pasr.setEchoMode(QLineEdit.EchoMode.Normal)
         else:
-            self.input_pasr.setEchoMode(QLineEdit.EchoMode.Password)
+            self.ui.input_pasr.setEchoMode(QLineEdit.EchoMode.Password)
 
     def toggle_password_visibility2(self):
-        if self.toggle_button2.isChecked():
-            self.input_pasr2.setEchoMode(QLineEdit.EchoMode.Normal)
+        if self.ui.input_pasr2.echoMode() == QLineEdit.EchoMode.Password:
+            self.ui.input_pasr2.setEchoMode(QLineEdit.EchoMode.Normal)
         else:
-            self.input_pasr2.setEchoMode(QLineEdit.EchoMode.Password)
+            self.ui.input_pasr2.setEchoMode(QLineEdit.EchoMode.Password)
 
 
-class First_Window(QWidget):  # окно открытия приложения, вход
 
+class First_Window(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.initializeUI()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
 
-    def initializeUI(self):  # задача базовых настроек приложения
-        self.setGeometry(600, 200, 800, 600)  # 600, 200 - отступ при создании, 800, 600 - размер окна
+        # Базовые настройки окна
+        self.setGeometry(600, 200, 800, 600)
         self.setWindowTitle("Авторизация")
-        self.setUpFirst_Window()
+
+        # Подключение сигналов
+        self.ui.ot_button.clicked.connect(self.process_login)
+        self.ui.log_button.clicked.connect(self.gotoScreen_log)
+        self.ui.toggle_button.clicked.connect(self.toggle_password_visibility)
+
         self.show()
-
-    def setUpFirst_Window(self):  # расположение элементов на окне
-        main_v_box = QVBoxLayout()
-        self.input_log = QLineEdit(self)
-        self.input_log.setPlaceholderText("Введите логин")
-
-        self.input_pas = QLineEdit(self)
-        self.input_pas.setPlaceholderText("Введите пароль")
-        self.input_pas.setEchoMode(QLineEdit.EchoMode.Password)
-
-        self.ot_button = QPushButton("войти", self)
-        self.ot_button.clicked.connect(self.process_login)
-        # self.ot_button.QShortcut(QKeySequence('Ctrl+O'), self)
-        self.log_button = QPushButton("зарегистрироваться", self)
-        self.log_button.clicked.connect(self.gotoScreen_log)
-
-        self.toggle_button = QPushButton("👁️")
-        self.toggle_button.setCheckable(True)
-        self.toggle_button.setFixedSize(QSize(24, 24))
-        self.toggle_button.clicked.connect(self.toggle_password_visibility)
-
-        log_h_box = QHBoxLayout()
-        pas_h_box = QHBoxLayout()
-        log_h_box.addWidget(self.input_log)
-        pas_h_box.addWidget(self.input_pas)
-        pas_h_box.addWidget(self.toggle_button)
-        main_v_box.addLayout(log_h_box)
-        main_v_box.addLayout(pas_h_box)
-        main_v_box.addWidget(self.ot_button)
-        main_v_box.addWidget(self.log_button)
-
-        self.setLayout(main_v_box)
-
     def validate_login_data(self):  # Проверяет валидность данных для авторизации
         global USER_ID
-        username = self.input_log.text().strip()
-        password = self.input_pas.text().strip()
+        username = self.ui.input_logi.text().strip()
+        password = self.ui.input_pas.text().strip()
         check, id = login_system(username, password)
         if not username or not password:
             return False, "Заполните все поля"
@@ -393,10 +285,10 @@ class First_Window(QWidget):  # окно открытия приложения, 
         self.screen_main.show()
 
     def toggle_password_visibility(self):
-        if self.toggle_button.isChecked():
-            self.input_pas.setEchoMode(QLineEdit.EchoMode.Normal)
+        if self.ui.toggle_button.isChecked():
+            self.ui.input_pas.setEchoMode(QLineEdit.EchoMode.Normal)
         else:
-            self.input_pas.setEchoMode(QLineEdit.EchoMode.Password)
+            self.ui.input_pas.setEchoMode(QLineEdit.EchoMode.Password)
 
 
 def run():
