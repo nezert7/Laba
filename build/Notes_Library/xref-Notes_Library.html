@@ -19,15 +19,18 @@
 <span class="moduletype">Script</span>  <div class="import">
 imports:
     <a href="#PyQt6.QtCore">PyQt6.QtCore</a>
- &#8226;   <a href="#PyQt6.QtGui">PyQt6.QtGui</a>
  &#8226;   <a href="#PyQt6.QtWidgets">PyQt6.QtWidgets</a>
  &#8226;   <a href="#_collections_abc">_collections_abc</a>
  &#8226;   <a href="#_weakrefset">_weakrefset</a>
  &#8226;   <a href="#abc">abc</a>
+ &#8226;   <a href="#app_windows.log_window">app_windows.log_window</a>
+ &#8226;   <a href="#app_windows.main_window">app_windows.main_window</a>
+ &#8226;   <a href="#app_windows.reg_window">app_windows.reg_window</a>
  &#8226;   <a href="#codecs">codecs</a>
  &#8226;   <a href="#collections">collections</a>
  &#8226;   <a href="#collections.abc">collections.abc</a>
  &#8226;   <a href="#copyreg">copyreg</a>
+ &#8226;   <a href="#database.db">database.db</a>
  &#8226;   <a href="#encodings">encodings</a>
  &#8226;   <a href="#encodings.aliases">encodings.aliases</a>
  &#8226;   <a href="#encodings.ascii">encodings.ascii</a>
@@ -158,9 +161,6 @@ imports:
  &#8226;   <a href="#keyword">keyword</a>
  &#8226;   <a href="#linecache">linecache</a>
  &#8226;   <a href="#locale">locale</a>
- &#8226;   <a href="#log_window">log_window</a>
- &#8226;   <a href="#main">main</a>
- &#8226;   <a href="#new_main_window">new_main_window</a>
  &#8226;   <a href="#ntpath">ntpath</a>
  &#8226;   <a href="#operator">operator</a>
  &#8226;   <a href="#os">os</a>
@@ -174,7 +174,6 @@ imports:
  &#8226;   <a href="#pyi_rth_pyqt6.py">pyi_rth_pyqt6.py</a>
  &#8226;   <a href="#pyi_rth_setuptools.py">pyi_rth_setuptools.py</a>
  &#8226;   <a href="#re">re</a>
- &#8226;   <a href="#reg_window">reg_window</a>
  &#8226;   <a href="#reprlib">reprlib</a>
  &#8226;   <a href="#sre_compile">sre_compile</a>
  &#8226;   <a href="#sre_constants">sre_constants</a>
@@ -725,9 +724,9 @@ imported by:
  &#8226;   <a href="#PyQt6.QtGui">PyQt6.QtGui</a>
  &#8226;   <a href="#PyQt6.QtWidgets">PyQt6.QtWidgets</a>
  &#8226;   <a href="#PyQt6.sip">PyQt6.sip</a>
- &#8226;   <a href="#log_window">log_window</a>
- &#8226;   <a href="#new_main_window">new_main_window</a>
- &#8226;   <a href="#reg_window">reg_window</a>
+ &#8226;   <a href="#app_windows.log_window">app_windows.log_window</a>
+ &#8226;   <a href="#app_windows.main_window">app_windows.main_window</a>
+ &#8226;   <a href="#app_windows.reg_window">app_windows.reg_window</a>
 
   </div>
 
@@ -753,9 +752,9 @@ imported by:
  &#8226;   <a href="#PyQt6.QtGui">PyQt6.QtGui</a>
  &#8226;   <a href="#PyQt6.QtWidgets">PyQt6.QtWidgets</a>
  &#8226;   <a href="#app.py">app.py</a>
- &#8226;   <a href="#log_window">log_window</a>
- &#8226;   <a href="#new_main_window">new_main_window</a>
- &#8226;   <a href="#reg_window">reg_window</a>
+ &#8226;   <a href="#app_windows.log_window">app_windows.log_window</a>
+ &#8226;   <a href="#app_windows.main_window">app_windows.main_window</a>
+ &#8226;   <a href="#app_windows.reg_window">app_windows.reg_window</a>
 
   </div>
 
@@ -780,10 +779,9 @@ imports:
 imported by:
     <a href="#PyQt6">PyQt6</a>
  &#8226;   <a href="#PyQt6.QtWidgets">PyQt6.QtWidgets</a>
- &#8226;   <a href="#app.py">app.py</a>
- &#8226;   <a href="#log_window">log_window</a>
- &#8226;   <a href="#new_main_window">new_main_window</a>
- &#8226;   <a href="#reg_window">reg_window</a>
+ &#8226;   <a href="#app_windows.log_window">app_windows.log_window</a>
+ &#8226;   <a href="#app_windows.main_window">app_windows.main_window</a>
+ &#8226;   <a href="#app_windows.reg_window">app_windows.reg_window</a>
 
   </div>
 
@@ -808,9 +806,9 @@ imports:
   <div class="import">
 imported by:
     <a href="#app.py">app.py</a>
- &#8226;   <a href="#log_window">log_window</a>
- &#8226;   <a href="#new_main_window">new_main_window</a>
- &#8226;   <a href="#reg_window">reg_window</a>
+ &#8226;   <a href="#app_windows.log_window">app_windows.log_window</a>
+ &#8226;   <a href="#app_windows.main_window">app_windows.main_window</a>
+ &#8226;   <a href="#app_windows.reg_window">app_windows.reg_window</a>
 
   </div>
 
@@ -2276,6 +2274,81 @@ imported by:
 <span class="moduletype">MissingModule</span>  <div class="import">
 imported by:
     <a href="#typing_extensions">typing_extensions</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="app_windows"></a>
+  <a target="code" href="-" type="text/plain"><tt>app_windows</tt></a>
+<span class="moduletype">NamespacePackage</span>  <div class="import">
+imported by:
+    <a href="#app_windows.log_window">app_windows.log_window</a>
+ &#8226;   <a href="#app_windows.main_window">app_windows.main_window</a>
+ &#8226;   <a href="#app_windows.reg_window">app_windows.reg_window</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="app_windows.log_window"></a>
+  <a target="code" href="///C:/Users/kosty/PycharmProjects/Laba/app_windows/log_window.py" type="text/plain"><tt>app_windows.log_window</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#PyQt6">PyQt6</a>
+ &#8226;   <a href="#PyQt6.QtCore">PyQt6.QtCore</a>
+ &#8226;   <a href="#PyQt6.QtGui">PyQt6.QtGui</a>
+ &#8226;   <a href="#PyQt6.QtWidgets">PyQt6.QtWidgets</a>
+ &#8226;   <a href="#app_windows">app_windows</a>
+ &#8226;   <a href="#sys">sys</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#app.py">app.py</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="app_windows.main_window"></a>
+  <a target="code" href="///C:/Users/kosty/PycharmProjects/Laba/app_windows/main_window.py" type="text/plain"><tt>app_windows.main_window</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#PyQt6">PyQt6</a>
+ &#8226;   <a href="#PyQt6.QtCore">PyQt6.QtCore</a>
+ &#8226;   <a href="#PyQt6.QtGui">PyQt6.QtGui</a>
+ &#8226;   <a href="#PyQt6.QtWidgets">PyQt6.QtWidgets</a>
+ &#8226;   <a href="#app_windows">app_windows</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#app.py">app.py</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="app_windows.reg_window"></a>
+  <a target="code" href="///C:/Users/kosty/PycharmProjects/Laba/app_windows/reg_window.py" type="text/plain"><tt>app_windows.reg_window</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#PyQt6">PyQt6</a>
+ &#8226;   <a href="#PyQt6.QtCore">PyQt6.QtCore</a>
+ &#8226;   <a href="#PyQt6.QtGui">PyQt6.QtGui</a>
+ &#8226;   <a href="#PyQt6.QtWidgets">PyQt6.QtWidgets</a>
+ &#8226;   <a href="#app_windows">app_windows</a>
+ &#8226;   <a href="#sys">sys</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#app.py">app.py</a>
 
   </div>
 
@@ -6751,6 +6824,43 @@ imported by:
 </div>
 
 <div class="node">
+  <a name="database"></a>
+  <a target="code" href="-" type="text/plain"><tt>database</tt></a>
+<span class="moduletype">NamespacePackage</span>  <div class="import">
+imported by:
+    <a href="#database.db">database.db</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="database.db"></a>
+  <a target="code" href="///C:/Users/kosty/PycharmProjects/Laba/database/db.py" type="text/plain"><tt>database.db</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#database">database</a>
+ &#8226;   <a href="#datetime">datetime</a>
+ &#8226;   <a href="#hashlib">hashlib</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#pathlib">pathlib</a>
+ &#8226;   <a href="#pydrive2.auth">pydrive2.auth</a>
+ &#8226;   <a href="#pydrive2.drive">pydrive2.drive</a>
+ &#8226;   <a href="#sqlite3">sqlite3</a>
+ &#8226;   <a href="#sys">sys</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.filedialog">tkinter.filedialog</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#app.py">app.py</a>
+
+  </div>
+
+</div>
+
+<div class="node">
   <a name="dataclasses"></a>
   <a target="code" href="///C:/Users/kosty/AppData/Local/Programs/Python/Python310/lib/dataclasses.py" type="text/plain"><tt>dataclasses</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
@@ -6808,6 +6918,7 @@ imported by:
  &#8226;   <a href="#calendar">calendar</a>
  &#8226;   <a href="#cryptography.x509.base">cryptography.x509.base</a>
  &#8226;   <a href="#cryptography.x509.extensions">cryptography.x509.extensions</a>
+ &#8226;   <a href="#database.db">database.db</a>
  &#8226;   <a href="#email.utils">email.utils</a>
  &#8226;   <a href="#google.auth._helpers">google.auth._helpers</a>
  &#8226;   <a href="#google.auth.app_engine">google.auth.app_engine</a>
@@ -6824,7 +6935,6 @@ imported by:
  &#8226;   <a href="#googleapiclient.discovery_cache.file_cache">googleapiclient.discovery_cache.file_cache</a>
  &#8226;   <a href="#http.cookiejar">http.cookiejar</a>
  &#8226;   <a href="#http.server">http.server</a>
- &#8226;   <a href="#main">main</a>
  &#8226;   <a href="#oauth2client.client">oauth2client.client</a>
  &#8226;   <a href="#oauth2client.contrib._metadata">oauth2client.contrib._metadata</a>
  &#8226;   <a href="#oauth2client.service_account">oauth2client.service_account</a>
@@ -13483,13 +13593,13 @@ imports:
 imported by:
     <a href="#charset_normalizer.models">charset_normalizer.models</a>
  &#8226;   <a href="#cryptography.x509.extensions">cryptography.x509.extensions</a>
+ &#8226;   <a href="#database.db">database.db</a>
  &#8226;   <a href="#google.auth._helpers">google.auth._helpers</a>
  &#8226;   <a href="#google.auth.aws">google.auth.aws</a>
  &#8226;   <a href="#hmac">hmac</a>
  &#8226;   <a href="#httplib2">httplib2</a>
  &#8226;   <a href="#jinja2.bccache">jinja2.bccache</a>
  &#8226;   <a href="#jinja2.loaders">jinja2.loaders</a>
- &#8226;   <a href="#main">main</a>
  &#8226;   <a href="#oauth2client._pkce">oauth2client._pkce</a>
  &#8226;   <a href="#random">random</a>
  &#8226;   <a href="#requests.auth">requests.auth</a>
@@ -16060,26 +16170,6 @@ imported by:
 </div>
 
 <div class="node">
-  <a name="log_window"></a>
-  <a target="code" href="///C:/Users/kosty/PycharmProjects/Laba/log_window.py" type="text/plain"><tt>log_window</tt></a>
-<span class="moduletype">SourceModule</span>  <div class="import">
-imports:
-    <a href="#PyQt6">PyQt6</a>
- &#8226;   <a href="#PyQt6.QtCore">PyQt6.QtCore</a>
- &#8226;   <a href="#PyQt6.QtGui">PyQt6.QtGui</a>
- &#8226;   <a href="#PyQt6.QtWidgets">PyQt6.QtWidgets</a>
- &#8226;   <a href="#sys">sys</a>
-
-  </div>
-  <div class="import">
-imported by:
-    <a href="#app.py">app.py</a>
-
-  </div>
-
-</div>
-
-<div class="node">
   <a name="logging"></a>
   <a target="code" href="///C:/Users/kosty/AppData/Local/Programs/Python/Python310/lib/logging/__init__.py" type="text/plain"><tt>logging</tt></a>
 <span class="moduletype">Package</span>  <div class="import">
@@ -16188,31 +16278,6 @@ imported by:
  &#8226;   <a href="#shutil">shutil</a>
  &#8226;   <a href="#tarfile">tarfile</a>
  &#8226;   <a href="#zipfile">zipfile</a>
-
-  </div>
-
-</div>
-
-<div class="node">
-  <a name="main"></a>
-  <a target="code" href="///C:/Users/kosty/PycharmProjects/Laba/main.py" type="text/plain"><tt>main</tt></a>
-<span class="moduletype">SourceModule</span>  <div class="import">
-imports:
-    <a href="#datetime">datetime</a>
- &#8226;   <a href="#hashlib">hashlib</a>
- &#8226;   <a href="#os">os</a>
- &#8226;   <a href="#pathlib">pathlib</a>
- &#8226;   <a href="#pydrive2.auth">pydrive2.auth</a>
- &#8226;   <a href="#pydrive2.drive">pydrive2.drive</a>
- &#8226;   <a href="#sqlite3">sqlite3</a>
- &#8226;   <a href="#sys">sys</a>
- &#8226;   <a href="#tkinter">tkinter</a>
- &#8226;   <a href="#tkinter.filedialog">tkinter.filedialog</a>
-
-  </div>
-  <div class="import">
-imported by:
-    <a href="#app.py">app.py</a>
 
   </div>
 
@@ -17216,25 +17281,6 @@ imported by:
 </div>
 
 <div class="node">
-  <a name="new_main_window"></a>
-  <a target="code" href="///C:/Users/kosty/PycharmProjects/Laba/new_main_window.py" type="text/plain"><tt>new_main_window</tt></a>
-<span class="moduletype">SourceModule</span>  <div class="import">
-imports:
-    <a href="#PyQt6">PyQt6</a>
- &#8226;   <a href="#PyQt6.QtCore">PyQt6.QtCore</a>
- &#8226;   <a href="#PyQt6.QtGui">PyQt6.QtGui</a>
- &#8226;   <a href="#PyQt6.QtWidgets">PyQt6.QtWidgets</a>
-
-  </div>
-  <div class="import">
-imported by:
-    <a href="#app.py">app.py</a>
-
-  </div>
-
-</div>
-
-<div class="node">
   <a name="nt"></a>
   <tt>nt</tt> <span class="moduletype"><i>(builtin module)</i></span>  <div class="import">
 imported by:
@@ -17999,6 +18045,7 @@ imported by:
  &#8226;   <a href="#ctypes._aix">ctypes._aix</a>
  &#8226;   <a href="#ctypes.macholib.dyld">ctypes.macholib.dyld</a>
  &#8226;   <a href="#ctypes.util">ctypes.util</a>
+ &#8226;   <a href="#database.db">database.db</a>
  &#8226;   <a href="#distutils._msvccompiler">distutils._msvccompiler</a>
  &#8226;   <a href="#distutils.archive_util">distutils.archive_util</a>
  &#8226;   <a href="#distutils.ccompiler">distutils.ccompiler</a>
@@ -18065,7 +18112,6 @@ imported by:
  &#8226;   <a href="#locale">locale</a>
  &#8226;   <a href="#logging">logging</a>
  &#8226;   <a href="#lzma">lzma</a>
- &#8226;   <a href="#main">main</a>
  &#8226;   <a href="#mimetypes">mimetypes</a>
  &#8226;   <a href="#multiprocessing.connection">multiprocessing.connection</a>
  &#8226;   <a href="#multiprocessing.context">multiprocessing.context</a>
@@ -18728,13 +18774,13 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#importlib._common">importlib._common</a>
+    <a href="#database.db">database.db</a>
+ &#8226;   <a href="#importlib._common">importlib._common</a>
  &#8226;   <a href="#importlib.metadata">importlib.metadata</a>
  &#8226;   <a href="#importlib.readers">importlib.readers</a>
  &#8226;   <a href="#importlib.resources">importlib.resources</a>
  &#8226;   <a href="#importlib_metadata">importlib_metadata</a>
  &#8226;   <a href="#importlib_metadata.compat.py311">importlib_metadata.compat.py311</a>
- &#8226;   <a href="#main">main</a>
  &#8226;   <a href="#packaging.metadata">packaging.metadata</a>
  &#8226;   <a href="#platformdirs">platformdirs</a>
  &#8226;   <a href="#platformdirs.api">platformdirs.api</a>
@@ -20547,7 +20593,7 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#main">main</a>
+    <a href="#database.db">database.db</a>
  &#8226;   <a href="#pydrive2.drive">pydrive2.drive</a>
  &#8226;   <a href="#pydrive2.files">pydrive2.files</a>
 
@@ -20568,7 +20614,7 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#main">main</a>
+    <a href="#database.db">database.db</a>
 
   </div>
 
@@ -21295,26 +21341,6 @@ imported by:
  &#8226;   <a href="#pdb">pdb</a>
  &#8226;   <a href="#rlcompleter">rlcompleter</a>
  &#8226;   <a href="#site">site</a>
-
-  </div>
-
-</div>
-
-<div class="node">
-  <a name="reg_window"></a>
-  <a target="code" href="///C:/Users/kosty/PycharmProjects/Laba/reg_window.py" type="text/plain"><tt>reg_window</tt></a>
-<span class="moduletype">SourceModule</span>  <div class="import">
-imports:
-    <a href="#PyQt6">PyQt6</a>
- &#8226;   <a href="#PyQt6.QtCore">PyQt6.QtCore</a>
- &#8226;   <a href="#PyQt6.QtGui">PyQt6.QtGui</a>
- &#8226;   <a href="#PyQt6.QtWidgets">PyQt6.QtWidgets</a>
- &#8226;   <a href="#sys">sys</a>
-
-  </div>
-  <div class="import">
-imported by:
-    <a href="#app.py">app.py</a>
 
   </div>
 
@@ -26340,7 +26366,7 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#main">main</a>
+    <a href="#database.db">database.db</a>
  &#8226;   <a href="#sqlite3">sqlite3</a>
  &#8226;   <a href="#sqlite3.dbapi2">sqlite3.dbapi2</a>
  &#8226;   <a href="#sqlite3.dump">sqlite3.dump</a>
@@ -26739,6 +26765,8 @@ imported by:
  &#8226;   <a href="#_pyi_rth_utils">_pyi_rth_utils</a>
  &#8226;   <a href="#_sitebuiltins">_sitebuiltins</a>
  &#8226;   <a href="#app.py">app.py</a>
+ &#8226;   <a href="#app_windows.log_window">app_windows.log_window</a>
+ &#8226;   <a href="#app_windows.reg_window">app_windows.reg_window</a>
  &#8226;   <a href="#argparse">argparse</a>
  &#8226;   <a href="#ast">ast</a>
  &#8226;   <a href="#asyncio">asyncio</a>
@@ -26782,6 +26810,7 @@ imported by:
  &#8226;   <a href="#ctypes._aix">ctypes._aix</a>
  &#8226;   <a href="#ctypes._endian">ctypes._endian</a>
  &#8226;   <a href="#ctypes.util">ctypes.util</a>
+ &#8226;   <a href="#database.db">database.db</a>
  &#8226;   <a href="#dataclasses">dataclasses</a>
  &#8226;   <a href="#datetime">datetime</a>
  &#8226;   <a href="#dis">dis</a>
@@ -26844,9 +26873,7 @@ imported by:
  &#8226;   <a href="#jinja2.runtime">jinja2.runtime</a>
  &#8226;   <a href="#linecache">linecache</a>
  &#8226;   <a href="#locale">locale</a>
- &#8226;   <a href="#log_window">log_window</a>
  &#8226;   <a href="#logging">logging</a>
- &#8226;   <a href="#main">main</a>
  &#8226;   <a href="#mimetypes">mimetypes</a>
  &#8226;   <a href="#multiprocessing">multiprocessing</a>
  &#8226;   <a href="#multiprocessing.connection">multiprocessing.connection</a>
@@ -26911,7 +26938,6 @@ imported by:
  &#8226;   <a href="#pyparsing.helpers">pyparsing.helpers</a>
  &#8226;   <a href="#pyparsing.unicode">pyparsing.unicode</a>
  &#8226;   <a href="#quopri">quopri</a>
- &#8226;   <a href="#reg_window">reg_window</a>
  &#8226;   <a href="#requests.compat">requests.compat</a>
  &#8226;   <a href="#requests.packages">requests.packages</a>
  &#8226;   <a href="#requests.sessions">requests.sessions</a>
@@ -27378,7 +27404,7 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#main">main</a>
+    <a href="#database.db">database.db</a>
  &#8226;   <a href="#tkinter.commondialog">tkinter.commondialog</a>
  &#8226;   <a href="#tkinter.constants">tkinter.constants</a>
  &#8226;   <a href="#tkinter.dialog">tkinter.dialog</a>
@@ -27457,7 +27483,7 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#main">main</a>
+    <a href="#database.db">database.db</a>
  &#8226;   <a href="#tkinter">tkinter</a>
 
   </div>
