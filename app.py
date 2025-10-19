@@ -1,15 +1,18 @@
 import sys
 import webbrowser  # чтоб ссылки открывались
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QComboBox, \
-    QBoxLayout, QTabWidget, QListWidget, QFileDialog, QTextEdit, QMessageBox, QTableWidget, QTableWidgetItem, \
-    QDockWidget, QFormLayout, QSpinBox, QToolBar, QApplication, QMainWindow, QTableWidget, QTableWidgetItem, \
-    QDockWidget, QFormLayout, QLineEdit, QWidget, QPushButton, QSpinBox, QMessageBox, QToolBar, QMessageBox
-from PyQt6.QtGui import QPixmap, QIcon, QAction
-from PyQt6.QtCore import Qt, QFile, QIODevice, QTextStream, QSize
-from main import create_account, login_system, all_name_subject, all_info_files_user, download_inf_file_in_db, delete_file, download_from_gdrive
-from log_window import Ui_MainWindow
-from reg_window import Ui_LogWindow
-from new_main_window import Ui_Con_Window
+
+from PyQt6.QtWidgets import QApplication, QLineEdit, \
+    QMessageBox, QTableWidgetItem, \
+    QApplication, QMainWindow, QTableWidgetItem, \
+    QLineEdit, QMessageBox, QMessageBox
+from PyQt6.QtCore import Qt
+
+from database.db import create_account, login_system, all_name_subject, \
+    all_info_files_user, download_inf_file_in_db, delete_file, download_from_gdrive
+
+from app_windows.log_window import Ui_MainWindow
+from app_windows.reg_window import Ui_LogWindow
+from app_windows.main_window import Ui_Con_Window
 
 USER_ID = 0
 
