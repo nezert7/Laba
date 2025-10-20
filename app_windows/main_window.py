@@ -299,5 +299,5 @@ class Ui_Con_Window(object):
 
     def update_date_field(self):
         selected_date = self.calendarWidget.selectedDate()
-        date_str = selected_date.toString("dd.MM.yyyy")
+        date_str = selected_date.toString("dd/MM/yyyy")
         self.age.setText(date_str)

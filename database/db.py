@@ -1,285 +1,134 @@
-import sqlite3
 import os
 import sys
+import psycopg2
+import hashlib
+from datetime import datetime
+from pathlib import Path
+from tkinter import filedialog
 
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
-from datetime import datetime
-from tkinter import filedialog
-from pathlib import Path
-import hashlib
 
+# -----------------------
+# Пути к файлам и ресурсы
+# -----------------------
 def get_app_path():
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
     else:
         return os.path.dirname(os.path.abspath(__file__))
 
-
 def resource_path(relative_path):
     base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
-
 APP_PATH = get_app_path()
-DB_PATH = os.path.join(APP_PATH, "test.db")
 TOKEN_PATH = os.path.join(APP_PATH, "mycreds.txt")
 CLIENT_SECRETS_PATH = resource_path("client_secrets.json")
 
-connect = sqlite3.connect(DB_PATH)
-cursor = connect.cursor()
-# cursor.execute("""DROP TABLE IF EXISTS USERS""")
-# cursor.execute("""DROP TABLE IF EXISTS DOWNLOADS""")
-# cursor.execute("""DROP TABLE IF EXISTS SUBJECT""")
-cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
-                                            ID_USER INT,
-                                            ID_SUBJECT INT,     
-                                            DATE_UPLOAD DATETIME,
-                                            DATE_NOTE DATE,
-                                            LINK TEXT,
-                                            NAME_FILE TEXT
-                                        )""")
+# -----------------------
+# Конфигурация базы (Shared Pooler)
+# -----------------------
+DB_CONFIG = {
+    'host': 'aws-1-us-east-2.pooler.supabase.com',  # Shared Pooler host
+    'port': 6543,                                   # Port pooler
+    'database': 'postgres',                         # Database
+    'user': 'postgres.uhmuxhzsdojtruaisihm',       # User
+    'password': 'xdun$N/qB%QJ77/'               # Пароль
+}
 
-cursor.execute("""CREATE TABLE IF NOT EXISTS USERS( 
-                                            ID_USERS INTEGER PRIMARY KEY AUTOINCREMENT,     
-                                            NAME TEXT UNIQUE,
-                                            PASSWORD TEXT
-                                        )""")
+# -----------------------
+# Подключение к базе
+# -----------------------
+def get_connection():
+    return psycopg2.connect(**DB_CONFIG)
 
-cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
-                                            ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
-                                            NAME TEXT UNIQUE
-                                        )""")
-
-
-def hash_password(password: str):  # Функция для хеширования паролей
+# -----------------------
+# Пользователи
+# -----------------------
+def hash_password(password: str):
     return hashlib.sha256(password.encode()).hexdigest()
 
-
 def create_account(user_name: str, password: str):
-    connect = sqlite3.connect(DB_PATH)
-    cursor = connect.cursor()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS USERS( 
-                                                ID_USERS INTEGER PRIMARY KEY AUTOINCREMENT,     
-                                                NAME TEXT UNIQUE,
-                                                PASSWORD TEXT
-                                            )""")
-    all_users = cursor.execute("""SELECT NAME FROM USERS""")
-    all_users = [str(x)[2:-3] for x in all_users]
-    if user_name == '':
+    if not user_name.strip():
         return 'некорректный логин'
-    if password == '':
+    if not password.strip():
         return 'некорректный пароль'
-    if user_name not in all_users:
-        password = hash_password(password)
-        cursor.execute("""INSERT INTO USERS(NAME, PASSWORD)
-                                VALUES(?, ?)""", (user_name, password))
-        connect.commit()
-        return True
-    else:
+
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id_users FROM users WHERE name=%s", (user_name,))
+    if cur.fetchone():
+        cur.close()
+        conn.close()
         return False
 
+    cur.execute("INSERT INTO users(name, password) VALUES (%s, %s) RETURNING id_users",
+                (user_name, hash_password(password)))
+    user_id = cur.fetchone()[0]
+    conn.commit()
+    cur.close()
+    conn.close()
+    return user_id
 
-def login_system(user_name: str,
-                 input_password: str):  # Функция для проверки логина и пароля под которыми входит пользователь
-    connect = sqlite3.connect(DB_PATH)
-    cursor = connect.cursor()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS USERS( 
-                                                    ID_USERS INTEGER PRIMARY KEY AUTOINCREMENT,     
-                                                    NAME TEXT UNIQUE,
-                                                    PASSWORD TEXT
-                                                )""")
-    input_password = hash_password(input_password)
-    all_users_password = [x for x in cursor.execute("""SELECT NAME, PASSWORD FROM USERS""")]
-    for user, password in all_users_password:
-        if user_name == user:
-            if input_password == password:
-                id_user = \
-                    [str(x)[1:-2] for x in cursor.execute(f"""SELECT ID_USERS FROM USERS WHERE NAME='{user_name}'""")][
-                        0]
-                connect.commit()
-                return True, int(
-                    id_user)  # разрешаем доступ, всё хорошо и возвращаем id пользователя под именем которого зашли
-    return False, 0  # здесь нужна функция, которая выведет подобную ошибку на экран
+def login_system(user_name: str, input_password: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id_users, password FROM users WHERE name=%s", (user_name,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not row:
+        return False, 0
+    user_id, stored_password = row
+    if hash_password(input_password) == stored_password:
+        return True, user_id
+    return False, 0
 
+# -----------------------
+# Предметы
+# -----------------------
+def create_subject(new_subject: str):
+    new_subject = new_subject.capitalize()
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT 1 FROM subject WHERE name=%s", (new_subject,))
+    if not cur.fetchone():
+        cur.execute("INSERT INTO subject(name) VALUES (%s)", (new_subject,))
+        conn.commit()
+    cur.close()
+    conn.close()
 
-def upload_to_drive():  # Функция загружает файл на мой гугл драйв
-    folder_id = "1zVT6Fr6LzzqzXWO9RJdl8d89uQIIJew-"
-    file_path = choose_file()
-    gauth = GoogleAuth()
-    gauth.settings['get_refresh_token'] = True
-    gauth.settings['oauth_scope'] = [
-        'https://www.googleapis.com/auth/drive.file',
-        'https://www.googleapis.com/auth/drive'
-    ]
-    gauth.LoadClientConfigFile(CLIENT_SECRETS_PATH)
+def all_name_subject(id_user: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id_subject FROM downloads WHERE id_user=%s", (id_user,))
+    id_subjects = [row[0] for row in cur.fetchall()]
+    if not id_subjects:
+        cur.close()
+        conn.close()
+        return []
 
-    if os.path.exists(TOKEN_PATH):
-        gauth.LoadCredentialsFile(TOKEN_PATH)
-    if gauth.credentials is None:
-        gauth.LocalWebserverAuth()  # один раз откроется браузер
-    elif gauth.access_token_expired:
-        gauth.Refresh()
-    else:
-        gauth.Authorize()
-
-    # Сохраняем токен рядом с exe
-    gauth.SaveCredentialsFile(TOKEN_PATH)
-
-    drive = GoogleDrive(gauth)
-    file_name = os.path.basename(file_path)
-    gfile = drive.CreateFile({'title': file_name, 'parents': [{'id': folder_id}] if folder_id else []})
-    gfile.SetContentFile(file_path)
-    gfile.Upload()
-    return [f"https://drive.google.com/file/d/{gfile['id']}/view", file_name]
-
-
-def date_now():  # Здесь забирается актуальное время
-    now = datetime.now()
-    dt_string = now.strftime("%d/%m/%Y %H:%M")
-    return dt_string
-
-
-def all_name_subject(id_user):
-    connect = sqlite3.connect(DB_PATH)
-    cursor = connect.cursor()
-    cursor.execute(f"""SELECT ID_SUBJECT FROM DOWNLOADS WHERE ID_USER = ?""", (id_user,))
-    id_subject = [row[0] for row in cursor.fetchall()]
-    placeholders = ','.join(['?'] * len(id_subject))
-    cursor.execute(f"""SELECT NAME FROM SUBJECT WHERE ID_SUBJECT IN ({placeholders})""", id_subject)
-    names = [row[0] for row in cursor.fetchall()]
+    placeholders = ','.join(['%s'] * len(id_subjects))
+    cur.execute(f"SELECT name FROM subject WHERE id_subject IN ({placeholders})", id_subjects)
+    names = [row[0] for row in cur.fetchall()]
+    cur.close()
+    conn.close()
     return names
 
-
-def create_subject(new_subject):  # Функция для добавления в db новый предметов
-    new_subject = new_subject.capitalize()
-    cursor.execute("SELECT 1 FROM SUBJECT WHERE NAME = ?", (new_subject,))
-    exists = cursor.fetchone()
-    if not exists:
-        cursor.execute("INSERT INTO SUBJECT(NAME) VALUES (?)", (new_subject,))
-        connect.commit()
-
-
-def choose_file():  # Открываем проводник
-    file_path = filedialog.askopenfilename()
-    return file_path
-
+# -----------------------
+# Выбор файлов/папок
+# -----------------------
+def choose_file():
+    return filedialog.askopenfilename()
 
 def choose_folder():
-    file_path = filedialog.askdirectory()
-    return file_path
+    return filedialog.askdirectory()
 
-
-def download_inf_file_in_db(id_user: int, subject_name: str,
-                            date_note: str):  # Функция для загрузки ссылки на файл и всей информации про файл в db
-    connect = sqlite3.connect(DB_PATH)
-    cursor = connect.cursor()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
-                                                ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
-                                                NAME TEXT UNIQUE
-                                            )""")
-    cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
-                                                ID_USER INT,
-                                                ID_SUBJECT INT,     
-                                                DATE_UPLOAD DATETIME,
-                                                DATE_NOTE DATE,
-                                                LINK TEXT,
-                                                NAME_FILE TEXT
-                                            )""")
-    all_subject = [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME FROM SUBJECT""")]
-    subject_name = subject_name.capitalize()
-    if subject_name not in all_subject:
-        create_subject(subject_name)
-    subject_id = int(
-        [str(x)[1:-2] for x in
-         cursor.execute(f"""SELECT ID_SUBJECT FROM SUBJECT WHERE NAME = '{subject_name}'""")][0])
-    link, file_name = map(str, upload_to_drive())
-    dt = date_now()
-    cursor.execute("""INSERT INTO DOWNLOADS
-                                    VALUES(?, ?, ?, ?, ?, ?)""",
-                   (id_user, subject_id, dt, date_note, link, file_name))
-    connect.commit()
-    return link, dt, file_name
-
-
-def upload_file_from_db(subject,
-                        name):  # Здесь мы выгружаем из db ссылку на файл который хотим открыть, присутствует сортировка по имени и дате
-    # date_create_start = input()  # Дата от которой ищем, нужна отдельная функция для ввода
-    # date_create_end = input()  # Дата до которой ищем, нужна отдельная функция для ввода
-    # Название предмета ссылку на конспект которого мы хотим получить, нужна отдельная функция для ввода
-    connect = sqlite3.connect(DB_PATH)
-    cursor = connect.cursor()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
-                                                    ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
-                                                    NAME TEXT UNIQUE
-                                                )""")
-    cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
-                                                    ID_USER INT,
-                                                    ID_SUBJECT INT,     
-                                                    DATE_UPLOAD DATETIME,
-                                                    DATE_NOTE DATE,
-                                                    LINK TEXT,
-                                                    NAME_FILE TEXT
-                                                )""")
-    subjects_id = [int(str(x)[1:-2]) for x in
-                   cursor.execute(f"""SELECT ID_SUBJECT FROM SUBJECT WHERE NAME = '{subject}'""")]
-    files_search_1 = [str(x)[2:-3] for x in
-                      cursor.execute("""SELECT LINK FROM DOWNLOADS WHERE ID_SUBJECT IN (?)""", subjects_id)]
-    # if date_create_start == '' and date_create_end != '':
-    #     date_create_start = date_create_end
-    # elif date_create_start != '' and date_create_end == '':
-    #     date_create_end = date_create_start
-    # elif date_create_start == '' and date_create_end == '':
-    #     date_create_start = '01/01/1900'
-    #     date_create_end = '01/01/2050'
-    # files_search_3 = [str(x)[2:-3] for x in cursor.execute(
-    #     f"""SELECT LINK FROM DOWNLOADS WHERE DATE_NOTE BETWEEN {date_create_start} AND {date_create_end}""")]
-    files_search_2 = [str(x)[2:-3] for x in
-                      cursor.execute(f"""SELECT LINK FROM DOWNLOADS WHERE NAME_FILE = '{name}'""")]
-    if subject and name:
-        final_files = set(files_search_1) & set(files_search_2)
-    elif subject:
-        final_files = files_search_1
-    else:
-        final_files = files_search_2
-    connect.commit()
-    if final_files:
-        return final_files
-    else:
-        return False
-
-
-def all_name_files():
-    connect = sqlite3.connect(DB_PATH)
-    cursor = connect.cursor()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
-                                                ID_USER INT,
-                                                ID_SUBJECT INT,     
-                                                DATE_UPLOAD DATETIME,
-                                                DATE_NOTE DATE,
-                                                LINK TEXT,
-                                                NAME_FILE TEXT
-                                            )""")
-    return [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME_FILE FROM DOWNLOADS""")]
-
-
-def extract_file_id(url: str):
-    if '/d/' in url:
-        return url.split('/d/')[1].split('/')[0]
-    elif 'id=' in url:
-        return url.split('id=')[1].split('&')[0]
-    else:
-        return None
-
-
-def download_from_gdrive(url: str, file_name: str):
-    # Извлекаем ID файла
-    save_folder = choose_folder()
-    Path(save_folder).mkdir(parents=True, exist_ok=True)
-    file_id = extract_file_id(url)
-    if not file_id:
-        raise ValueError("Неверный URL Google Drive")
-
+# -----------------------
+# Google Drive
+# -----------------------
+def setup_gauth():
     gauth = GoogleAuth()
     gauth.settings['get_refresh_token'] = True
     gauth.settings['oauth_scope'] = [
@@ -287,108 +136,159 @@ def download_from_gdrive(url: str, file_name: str):
         'https://www.googleapis.com/auth/drive'
     ]
     gauth.LoadClientConfigFile(CLIENT_SECRETS_PATH)
+
     if os.path.exists(TOKEN_PATH):
         gauth.LoadCredentialsFile(TOKEN_PATH)
-
     if gauth.credentials is None:
         gauth.LocalWebserverAuth()
     elif gauth.access_token_expired:
         gauth.Refresh()
     else:
         gauth.Authorize()
-
     gauth.SaveCredentialsFile(TOKEN_PATH)
+    return gauth
+
+def upload_to_drive():
+    folder_id = "1zVT6Fr6LzzqzXWO9RJdl8d89uQIIJew-"  # Папка на Google Drive
+    file_path = choose_file()
+    gauth = setup_gauth()
+    drive = GoogleDrive(gauth)
+
+    file_name = os.path.basename(file_path)
+    gfile = drive.CreateFile({'title': file_name, 'parents': [{'id': folder_id}] if folder_id else []})
+    gfile.SetContentFile(file_path)
+    gfile.Upload()
+    return [f"https://drive.google.com/file/d/{gfile['id']}/view", file_name]
+
+# -----------------------
+# Дата
+# -----------------------
+def date_now():
+    return datetime.now()
+
+# -----------------------
+# Загрузка файлов в БД
+# -----------------------
+def download_inf_file_in_db(id_user: int, subject_name: str, date_note_str: str):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    subject_name = subject_name.capitalize()
+    cur.execute("SELECT id_subject FROM subject WHERE name=%s", (subject_name,))
+    row = cur.fetchone()
+    if row:
+        subject_id = row[0]
+    else:
+        create_subject(subject_name)
+        cur.execute("SELECT id_subject FROM subject WHERE name=%s", (subject_name,))
+        subject_id = cur.fetchone()[0]
+
+    link, file_name = map(str, upload_to_drive())
+    dt = date_now()
+    date_note = datetime.strptime(date_note_str, "%d/%m/%Y").date()
+
+    cur.execute("""INSERT INTO downloads (id_user, id_subject, date_upload, date_note, link, name_file)
+                   VALUES (%s, %s, %s, %s, %s, %s)""",
+                (id_user, subject_id, dt, date_note, link, file_name))
+    conn.commit()
+    cur.close()
+    conn.close()
+    return link, dt, file_name
+
+# -----------------------
+# Скачивание файла из БД
+# -----------------------
+def upload_file_from_db(subject: str, name: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id_subject FROM subject WHERE name=%s", (subject,))
+    rows = cur.fetchall()
+    if not rows:
+        cur.close()
+        conn.close()
+        return False
+    subject_ids = [row[0] for row in rows]
+
+    placeholders = ','.join(['%s'] * len(subject_ids))
+    cur.execute(f"SELECT link FROM downloads WHERE id_subject IN ({placeholders}) AND name_file=%s",
+                (*subject_ids, name))
+    links = [row[0] for row in cur.fetchall()]
+    cur.close()
+    conn.close()
+    if links:
+        return links
+    return False
+
+# -----------------------
+# Все файлы
+# -----------------------
+def all_name_files():
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT name_file FROM downloads")
+    files = [row[0] for row in cur.fetchall()]
+    cur.close()
+    conn.close()
+    return files
+
+# -----------------------
+# Google Drive: скачивание
+# -----------------------
+def extract_file_id(url: str):
+    if '/d/' in url:
+        return url.split('/d/')[1].split('/')[0]
+    elif 'id=' in url:
+        return url.split('id=')[1].split('&')[0]
+    return None
+
+def download_from_gdrive(url: str, file_name: str):
+    save_folder = choose_folder()
+    Path(save_folder).mkdir(parents=True, exist_ok=True)
+    file_id = extract_file_id(url)
+    if not file_id:
+        raise ValueError("Неверный URL Google Drive")
+
+    gauth = setup_gauth()
     drive = GoogleDrive(gauth)
     gfile = drive.CreateFile({'id': file_id})
-    file_name = gfile['title']
-    save_path = os.path.join(save_folder, file_name)
-    gfile.GetContentFile(save_path)  # Надёжно работает в exe
-    return save_path  # Надёжно работает в exe
+    save_path = os.path.join(save_folder, gfile['title'])
+    gfile.GetContentFile(save_path)
+    return save_path
 
-
+# -----------------------
+# Информация о файлах пользователя
+# -----------------------
 def all_info_files_user(id_user: int):
-    connect = sqlite3.connect(DB_PATH)
-    cursor = connect.cursor()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
-                                                ID_USER INT,
-                                                ID_SUBJECT INT,     
-                                                DATE_UPLOAD DATETIME,
-                                                DATE_NOTE DATE,
-                                                LINK TEXT,
-                                                NAME_FILE TEXT
-                                            )""")
-    cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
-                                                ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
-                                                NAME TEXT UNIQUE
-                                            )""")
-    sp = [list(x) for x in cursor.execute(
-        f"""SELECT ID_SUBJECT, NAME_FILE, LINK, DATE_NOTE, DATE_UPLOAD FROM DOWNLOADS WHERE ID_USER = '{id_user}'""")]
-    for x in sp:
-        x[0] = ''.join(
-            [str(x)[2:-3] for x in cursor.execute(f"""SELECT NAME FROM SUBJECT WHERE ID_SUBJECT = '{x[0]}'""")])
-    return sp
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""SELECT d.id_subject, d.name_file, d.link, d.date_note, d.date_upload, s.name
+                   FROM downloads d
+                   JOIN subject s ON d.id_subject = s.id_subject
+                   WHERE d.id_user=%s""", (id_user,))
+    data = [[row[5], row[1], row[2], row[3], row[4]] for row in cur.fetchall()]
+    cur.close()
+    conn.close()
+    return data
 
-
+# -----------------------
+# Удаление файла
+# -----------------------
 def delete_file(id_user, name_subject, name_file, link, date):
-    connect = sqlite3.connect(DB_PATH)
-    cursor = connect.cursor()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS DOWNLOADS( 
-                                                ID_USER INT,
-                                                ID_SUBJECT INT,     
-                                                DATE_UPLOAD DATETIME,
-                                                DATE_NOTE DATE,
-                                                LINK TEXT,
-                                                NAME_FILE TEXT
-                                            )""")
-    cursor.execute("""CREATE TABLE IF NOT EXISTS SUBJECT( 
-                                                ID_SUBJECT INTEGER PRIMARY KEY AUTOINCREMENT,     
-                                                NAME TEXT UNIQUE
-                                            )""")
-    cursor.execute("SELECT ID_SUBJECT FROM SUBJECT WHERE NAME = ?", (name_subject,))
-    id_subject = [row[0] for row in cursor.fetchall()][0]
-    cursor.execute("""
-        DELETE FROM DOWNLOADS 
-        WHERE ID_USER = ? 
-        AND ID_SUBJECT = ? 
-        AND NAME_FILE = ? 
-        AND LINK = ? 
-        AND DATE_NOTE = ?
-    """, (id_user, id_subject, name_file, link, date))
-    connect.commit()
-    gauth = GoogleAuth()
-    gauth.settings['get_refresh_token'] = True
-    gauth.settings['oauth_scope'] = [
-        'https://www.googleapis.com/auth/drive.file',
-        'https://www.googleapis.com/auth/drive'
-    ]
+    date_note = datetime.strptime(date, "%Y-%m-%d").date()
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id_subject FROM subject WHERE name=%s", (name_subject,))
+    subject_id = cur.fetchone()[0]
 
-    # Загружаем client_secrets.json
-    gauth.LoadClientConfigFile(CLIENT_SECRETS_PATH)
+    cur.execute("""DELETE FROM downloads 
+                   WHERE id_user=%s AND id_subject=%s AND name_file=%s AND link=%s AND date_note=%s""",
+                (id_user, subject_id, name_file, link, date_note))
+    conn.commit()
+    cur.close()
+    conn.close()
 
-    # Загружаем токен
-    if os.path.exists(TOKEN_PATH):
-        gauth.LoadCredentialsFile(TOKEN_PATH)
-
-    if gauth.credentials is None:
-        gauth.LocalWebserverAuth()  # один раз откроется браузер
-    elif gauth.access_token_expired:
-        gauth.Refresh()
-    else:
-        gauth.Authorize()
-
-    # Сохраняем токен рядом с exe
-    gauth.SaveCredentialsFile(TOKEN_PATH)
-
+    gauth = setup_gauth()
     drive = GoogleDrive(gauth)
     file_id = extract_file_id(link)
     gfile = drive.CreateFile({'id': file_id})
     gfile.Delete()
-    cursor.execute("SELECT ID_SUBJECT FROM DOWNLOADS")
-    id_subject = 2
-    all_id_subject = [row[0] for row in cursor.fetchall()]
-    if id_subject not in all_id_subject:
-        cursor.execute("""
-                DELETE FROM SUBJECT 
-                WHERE ID_SUBJECT = ? 
-                    """, (id_subject,))
-    connect.commit()
