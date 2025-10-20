@@ -24,7 +24,7 @@ def resource_path(relative_path):
 
 APP_PATH = get_app_path()
 TOKEN_PATH = os.path.join(APP_PATH, "mycreds.txt")
-CLIENT_SECRETS_PATH = resource_path("client_secrets.json")
+CLIENT_SECRETS_PATH = resource_path("../client_secrets.json")
 
 # -----------------------
 # Конфигурация базы (Shared Pooler)
