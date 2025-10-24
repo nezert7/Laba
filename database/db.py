@@ -9,45 +9,45 @@ from tkinter import filedialog
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 
-# -----------------------
+
 # Пути к файлам и ресурсы
-# -----------------------
+
 def get_app_path():
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
     else:
         return os.path.dirname(os.path.abspath(__file__))
 
+
 def resource_path(relative_path):
     base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
+
 APP_PATH = get_app_path()
 TOKEN_PATH = os.path.join(APP_PATH, "mycreds.txt")
-CLIENT_SECRETS_PATH = resource_path("../client_secrets.json")
+CLIENT_SECRETS_PATH = resource_path("client_secrets.json")
 
-# -----------------------
 # Конфигурация базы (Shared Pooler)
-# -----------------------
+
 DB_CONFIG = {
     'host': 'aws-1-us-east-2.pooler.supabase.com',  # Shared Pooler host
-    'port': 6543,                                   # Port pooler
-    'database': 'postgres',                         # Database
-    'user': 'postgres.uhmuxhzsdojtruaisihm',       # User
-    'password': 'xdun$N/qB%QJ77/'               # Пароль
+    'port': 6543,  # Port pooler
+    'database': 'postgres',  # Database
+    'user': 'postgres.uhmuxhzsdojtruaisihm',  # User
+    'password': 'xdun$N/qB%QJ77/'  # Пароль
 }
 
-# -----------------------
+
 # Подключение к базе
-# -----------------------
 def get_connection():
     return psycopg2.connect(**DB_CONFIG)
 
-# -----------------------
+
 # Пользователи
-# -----------------------
 def hash_password(password: str):
     return hashlib.sha256(password.encode()).hexdigest()
+
 
 def create_account(user_name: str, password: str):
     if not user_name.strip():
@@ -71,6 +71,7 @@ def create_account(user_name: str, password: str):
     conn.close()
     return user_id
 
+
 def login_system(user_name: str, input_password: str):
     conn = get_connection()
     cur = conn.cursor()
@@ -85,9 +86,8 @@ def login_system(user_name: str, input_password: str):
         return True, user_id
     return False, 0
 
-# -----------------------
+
 # Предметы
-# -----------------------
 def create_subject(new_subject: str):
     new_subject = new_subject.capitalize()
     conn = get_connection()
@@ -98,6 +98,7 @@ def create_subject(new_subject: str):
         conn.commit()
     cur.close()
     conn.close()
+
 
 def all_name_subject(id_user: int):
     conn = get_connection()
@@ -116,18 +117,17 @@ def all_name_subject(id_user: int):
     conn.close()
     return names
 
-# -----------------------
+
 # Выбор файлов/папок
-# -----------------------
 def choose_file():
     return filedialog.askopenfilename()
+
 
 def choose_folder():
     return filedialog.askdirectory()
 
-# -----------------------
+
 # Google Drive
-# -----------------------
 def setup_gauth():
     gauth = GoogleAuth()
     gauth.settings['get_refresh_token'] = True
@@ -148,6 +148,7 @@ def setup_gauth():
     gauth.SaveCredentialsFile(TOKEN_PATH)
     return gauth
 
+
 def upload_to_drive():
     folder_id = "1zVT6Fr6LzzqzXWO9RJdl8d89uQIIJew-"  # Папка на Google Drive
     file_path = choose_file()
@@ -160,15 +161,13 @@ def upload_to_drive():
     gfile.Upload()
     return [f"https://drive.google.com/file/d/{gfile['id']}/view", file_name]
 
-# -----------------------
+
 # Дата
-# -----------------------
 def date_now():
     return datetime.now()
 
-# -----------------------
+
 # Загрузка файлов в БД
-# -----------------------
 def download_inf_file_in_db(id_user: int, subject_name: str, date_note_str: str):
     conn = get_connection()
     cur = conn.cursor()
@@ -185,7 +184,7 @@ def download_inf_file_in_db(id_user: int, subject_name: str, date_note_str: str)
 
     link, file_name = map(str, upload_to_drive())
     dt = date_now()
-    date_note = datetime.strptime(date_note_str, "%d/%m/%Y").date()
+    date_note = datetime.strptime(date_note_str, "%Y-%m-%d").date()
 
     cur.execute("""INSERT INTO downloads (id_user, id_subject, date_upload, date_note, link, name_file)
                    VALUES (%s, %s, %s, %s, %s, %s)""",
@@ -195,9 +194,8 @@ def download_inf_file_in_db(id_user: int, subject_name: str, date_note_str: str)
     conn.close()
     return link, dt, file_name
 
-# -----------------------
+
 # Скачивание файла из БД
-# -----------------------
 def upload_file_from_db(subject: str, name: str):
     conn = get_connection()
     cur = conn.cursor()
@@ -219,9 +217,8 @@ def upload_file_from_db(subject: str, name: str):
         return links
     return False
 
-# -----------------------
+
 # Все файлы
-# -----------------------
 def all_name_files():
     conn = get_connection()
     cur = conn.cursor()
@@ -231,15 +228,15 @@ def all_name_files():
     conn.close()
     return files
 
-# -----------------------
+
 # Google Drive: скачивание
-# -----------------------
 def extract_file_id(url: str):
     if '/d/' in url:
         return url.split('/d/')[1].split('/')[0]
     elif 'id=' in url:
         return url.split('id=')[1].split('&')[0]
     return None
+
 
 def download_from_gdrive(url: str, file_name: str):
     save_folder = choose_folder()
@@ -255,9 +252,8 @@ def download_from_gdrive(url: str, file_name: str):
     gfile.GetContentFile(save_path)
     return save_path
 
-# -----------------------
+
 # Информация о файлах пользователя
-# -----------------------
 def all_info_files_user(id_user: int):
     conn = get_connection()
     cur = conn.cursor()
@@ -270,13 +266,13 @@ def all_info_files_user(id_user: int):
     conn.close()
     return data
 
-# -----------------------
+
 # Удаление файла
-# -----------------------
 def delete_file(id_user, name_subject, name_file, link, date):
     date_note = datetime.strptime(date, "%Y-%m-%d").date()
     conn = get_connection()
     cur = conn.cursor()
+    name_subject = name_subject.capitalize()
     cur.execute("SELECT id_subject FROM subject WHERE name=%s", (name_subject,))
     subject_id = cur.fetchone()[0]
 
