@@ -1,7 +1,8 @@
 import os
 import sys
-import psycopg2
+import logging
 import hashlib
+import psycopg2
 from datetime import datetime
 from pathlib import Path
 from tkinter import filedialog
@@ -10,13 +11,40 @@ from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 
 
-# Пути к файлам и ресурсы
+# === НАСТРОЙКА ЛОГИРОВАНИЯ ===
+def setup_logger():
+    log_dir = os.path.join(Path.home(), "AppData", "Local", "MyApp")
+    Path(log_dir).mkdir(parents=True, exist_ok=True)
+    log_file = os.path.join(log_dir, "app_log.txt")
 
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler(log_file, encoding="utf-8"),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
+
+    logging.info("=== Приложение запущено ===")
+    return log_file
+
+
+LOG_FILE = setup_logger()
+
+
+# Пути к файлам и ресурсы
 def get_app_path():
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
     else:
         return os.path.dirname(os.path.abspath(__file__))
+
+
+def get_app_data_path():
+    base_path = os.path.join(Path.home(), "AppData", "Local", "MyApp")
+    Path(base_path).mkdir(parents=True, exist_ok=True)
+    return base_path
 
 
 def resource_path(relative_path):
@@ -29,7 +57,6 @@ TOKEN_PATH = os.path.join(APP_PATH, "mycreds.txt")
 CLIENT_SECRETS_PATH = resource_path("client_secrets.json")
 
 # Конфигурация базы (Shared Pooler)
-
 DB_CONFIG = {
     'host': 'aws-1-us-east-2.pooler.supabase.com',  # Shared Pooler host
     'port': 6543,  # Port pooler
@@ -139,14 +166,38 @@ def setup_gauth():
 
     if os.path.exists(TOKEN_PATH):
         gauth.LoadCredentialsFile(TOKEN_PATH)
-    if gauth.credentials is None:
-        gauth.LocalWebserverAuth()
-    elif gauth.access_token_expired:
-        gauth.Refresh()
-    else:
-        gauth.Authorize()
+
+    try:
+        if gauth.credentials is None:
+            logging.warning("Первичная авторизация Google...")
+            gauth.LocalWebserverAuth()
+        elif gauth.access_token_expired:
+            logging.info("Токен просрочен, обновляем...")
+            gauth.Refresh()
+        else:
+            gauth.Authorize()
+    except Exception as e:
+        logging.error("Ошибка Google авторизации: %s", e)
+
+        if os.path.exists(TOKEN_PATH):
+            try:
+                os.remove(TOKEN_PATH)
+                logging.info("Удалён повреждённый токен mycreds.txt")
+            except Exception as ex:
+                logging.error("Не удалось удалить токен: %s", ex)
+
+        try:
+            gauth.LoadCredentialsFile(TOKEN_PATH)
+            gauth.LocalWebserverAuth()
+            logging.info("Переавторизация через браузер выполнена успешно.")
+        except Exception as auth_error:
+            logging.critical("Не удалось пройти повторную авторизацию: %s", auth_error)
+            raise auth_error
+
     gauth.SaveCredentialsFile(TOKEN_PATH)
+    logging.info("Авторизация Google завершена успешно.")
     return gauth
+
 
 
 def upload_to_drive():
