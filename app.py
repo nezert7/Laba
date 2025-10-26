@@ -119,7 +119,6 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
                         msg.setIcon(QMessageBox.Icon.Information)
                         msg.setStyleSheet("""
                                                                             QMessageBox {
-                                                                                background-color: #121212;
                                                                                 color: white;
                                                                                 font-size: 14px;
                                                                             }
@@ -141,7 +140,6 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
                         msg.setIcon(QMessageBox.Icon.Critical)
                         msg.setStyleSheet("""
                                                                             QMessageBox {
-                                                                                background-color: #121212;
                                                                                 color: white;
                                                                                 font-size: 14px;
                                                                             }
@@ -169,7 +167,6 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setStyleSheet("""
                                                     QMessageBox {
-                                                        background-color: #121212;
                                                         color: white;
                                                         font-size: 14px;
                                                     }
@@ -213,7 +210,6 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setStyleSheet("""
                                         QMessageBox {
-                                            background-color: #121212;
                                             color: white;
                                             font-size: 14px;
                                         }
@@ -255,7 +251,6 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setStyleSheet("""
                             QMessageBox {
-                                background-color: #121212;
                                 color: white;
                                 font-size: 14px;
                             }
@@ -279,7 +274,6 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
         msg.setIcon(QMessageBox.Icon.Information)
         msg.setStyleSheet("""
                         QMessageBox {
-                            background-color: #121212;
                             color: white;
                             font-size: 14px;
                         }
@@ -343,7 +337,6 @@ class Log_Window(QMainWindow):
             msg.setIcon(QMessageBox.Icon.Information)
             msg.setStyleSheet("""
                 QMessageBox {
-                    background-color: #121212;
                     color: white;
                     font-size: 14px;
                 }
@@ -366,7 +359,6 @@ class Log_Window(QMainWindow):
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setStyleSheet("""
                 QMessageBox {
-                    background-color: #121212;
                     color: white;
                     font-size: 14px;
                 }
@@ -440,7 +432,6 @@ class First_Window(QMainWindow):
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setStyleSheet("""
                 QMessageBox {
-                    background-color: #121212;
                     color: white;
                     font-size: 14px;
                 }
