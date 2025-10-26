@@ -31,9 +31,9 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
         # Подключение сигналов
         self.ui.filter_label.currentTextChanged.connect(self.apply_filter)
         self.ui.pushButton_4.clicked.connect(self.download_selected)  # кнопка "Скачать"
-        self.ui.delete_action.clicked.connect(self.delete_selected)   # кнопка "Удалить"
-        self.ui.btn_add.clicked.connect(self.add_conspect)           # кнопка "Добавить"
-        self.ui.pushButton_6.clicked.connect(self.go_back)           # кнопка "Назад"
+        self.ui.delete_action.clicked.connect(self.delete_selected)  # кнопка "Удалить"
+        self.ui.btn_add.clicked.connect(self.add_conspect)  # кнопка "Добавить"
+        self.ui.pushButton_6.clicked.connect(self.go_back)  # кнопка "Назад"
 
         self.ui.table.cellClicked.connect(self.on_cell_clicked)
 
@@ -240,7 +240,6 @@ class Log_Window(QMainWindow):
             self.ui.input_pasr2.setEchoMode(QLineEdit.EchoMode.Password)
 
 
-
 class First_Window(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -257,6 +256,7 @@ class First_Window(QMainWindow):
         self.ui.toggle_button.clicked.connect(self.toggle_password_visibility)
 
         self.show()
+
     def validate_login_data(self):  # Проверяет валидность данных для авторизации
         global USER_ID
         username = self.ui.input_logi.text().strip()
@@ -295,6 +295,22 @@ class First_Window(QMainWindow):
 
 def run():
     app = QApplication(sys.argv)
+    app.setStyleSheet("""
+    QMessageBox {
+        background-color: #0a0a0a;
+        color: white;
+        font-family: Ariel;
+        font-size: 12px;
+    }
+    QToolTip {
+                background-color: #0a0a0a;
+                color: white;
+                border: 1px solid #ff00ff;
+                padding: 6px;
+                font-family: 'Ariel';
+                font-size: 10pt;
+            }
+    """)
     window = First_Window()
     sys.exit(app.exec())  # открытие приложения
 
