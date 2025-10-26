@@ -5316,7 +5316,7 @@
  [],
  False,
  False,
- 1761425591,
+ 1761464613,
  [('runw.exe',
    'C:\\Users\\kosty\\PycharmProjects\\Laba\\.venv\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\runw.exe',
    'EXECUTABLE')],
