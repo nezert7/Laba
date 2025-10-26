@@ -243,10 +243,13 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
         link = self.ui.table.item(row, 1).text()
         date = self.ui.table.item(row, 2).text()
 
+        QMessageBox.setStyleSheet("QLabel{ color: white}")
         reply = QMessageBox.question(
-            self, 'Удаление', f'Удалить конспект по предмету "{subject}"?',
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
+    self, 'Удаление', f'Удалить конспект по предмету "{subject}"?',
+    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+
+)
+        
         if reply == QMessageBox.StandardButton.Yes:
             delete_file(USER_ID, subject, name_file, link, date)
             self.conspect.pop(row)
