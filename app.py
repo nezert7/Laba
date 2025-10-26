@@ -62,7 +62,7 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
         self.ui.table.setRowCount(0)
         row = 0
         for e in self.conspect:
-            if filter_subject and filter_subject != "Выберите или введите предмет" and e['предмет'] != filter_subject:
+            if filter_subject and filter_subject != "Выберите предмет из списка" and e['предмет'] != filter_subject:
                 continue
 
             self.ui.table.insertRow(row)
@@ -81,7 +81,7 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
     def update_filter_combo(self):
         current = self.ui.filter_label.currentText()
         self.ui.filter_label.clear()
-        self.ui.filter_label.addItem("Выберите или введите предмет")
+        self.ui.filter_label.addItem("Выберите предмет из списка")
 
         subjects = set(item for item in all_name_subject(USER_ID))
         for s in sorted(subjects):
@@ -94,7 +94,7 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
 
     # 🟡 Применение фильтра
     def apply_filter(self, subject):
-        if subject == "Выберите или введите предмет":
+        if subject == "Выберите предмет из списка":
             self.populate_table()
         else:
             self.populate_table(subject)
@@ -192,10 +192,10 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
             msg.exec()
             return
 
-        # добавляем в базу
+        # Добавляем в базу
         link, dt, file_name = download_inf_file_in_db(USER_ID, subject, date)
 
-        # обновляем локально
+        # Обновляем локально
         self.conspect.append({
             'предмет': subject,
             'ссылка': link,
