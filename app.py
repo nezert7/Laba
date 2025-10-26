@@ -104,13 +104,31 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
         if column == 1:
             item = self.ui.table.item(row, column)
             if item and item.text().startswith(('http://', 'https://')):
-                reply = QMessageBox.question(
-                    self,
-                    'Открыть ссылку',
-                    f'Вы хотите открыть ссылку:\n{item.text()}',
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-                )
-                if reply == QMessageBox.StandardButton.Yes:
+                reply = QMessageBox(self)
+                reply.setIcon(QMessageBox.Icon.Question)
+                reply.setWindowTitle('Открыть ссылку')
+                reply.setText(f'Вы хотите открыть ссылку:\n{item.text()}')
+                reply.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                reply.setStyleSheet("""
+                                                        QMessageBox {
+                                                            background-color: #121212;
+                                                        }
+                                                        QLabel {
+                                                            color: white;
+                                                            font-size: 14px;
+                                                        }
+                                                        QPushButton {
+                                                            background-color: #333;
+                                                            color: white;
+                                                            border-radius: 6px;
+                                                            padding: 6px;
+                                                        }
+                                                        QPushButton:hover {
+                                                            background-color: #555;
+                                                        }
+                                                    """)
+                result = reply.exec()
+                if result == QMessageBox.StandardButton.Yes:
                     try:
                         webbrowser.open(item.text())
                         msg = QMessageBox(self)
@@ -243,11 +261,35 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
         link = self.ui.table.item(row, 1).text()
         date = self.ui.table.item(row, 2).text()
 
-        reply = QMessageBox.question(
-            self, 'Удаление', f'Удалить конспект по предмету "{subject}"?',
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-        if reply == QMessageBox.StandardButton.Yes:
+        # reply = QMessageBox.question(
+        #     self, 'Удаление', f'Удалить конспект по предмету "{subject}"?',
+        #     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        # )
+        reply = QMessageBox(self)
+        reply.setIcon(QMessageBox.Icon.Question)
+        reply.setWindowTitle('Удаление')
+        reply.setText(f'Удалить конспект по предмету "{subject}"?')
+        reply.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        reply.setStyleSheet("""
+                                        QMessageBox {
+                                            background-color: #121212;
+                                        }
+                                        QLabel {
+                                            color: white;
+                                            font-size: 14px;
+                                        }
+                                        QPushButton {
+                                            background-color: #333;
+                                            color: white;
+                                            border-radius: 6px;
+                                            padding: 6px;
+                                        }
+                                        QPushButton:hover {
+                                            background-color: #555;
+                                        }
+                                    """)
+        result = reply.exec()
+        if result == QMessageBox.StandardButton.Yes:
             delete_file(USER_ID, subject, name_file, link, date)
             self.conspect.pop(row)
             self.ui.table.removeRow(row)
