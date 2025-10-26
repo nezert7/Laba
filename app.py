@@ -113,9 +113,49 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
                 if reply == QMessageBox.StandardButton.Yes:
                     try:
                         webbrowser.open(item.text())
-                        QMessageBox.information(self, 'Успешно', 'Ссылка открывается в браузере')
+                        msg = QMessageBox(self)
+                        msg.setWindowTitle('Успешно')
+                        msg.setText('Ссылка открывается в браузере')
+                        msg.setIcon(QMessageBox.Icon.Information)
+                        msg.setStyleSheet("""
+                                                                            QMessageBox {
+                                                                                background-color: #121212;
+                                                                                color: white;
+                                                                                font-size: 14px;
+                                                                            }
+                                                                            QPushButton {
+                                                                                background-color: #333;
+                                                                                color: white;
+                                                                                border-radius: 6px;
+                                                                                padding: 6px;
+                                                                            }
+                                                                            QPushButton:hover {
+                                                                                background-color: #555;
+                                                                            }
+                                                                        """)
+                        msg.exec()
                     except Exception as e:
-                        QMessageBox.critical(self, 'Ошибка', f'Не удалось открыть ссылку: {str(e)}')
+                        msg = QMessageBox(self)
+                        msg.setWindowTitle('Ошибка')
+                        msg.setText(f'Не удалось открыть ссылку: {str(e)}')
+                        msg.setIcon(QMessageBox.Icon.Critical)
+                        msg.setStyleSheet("""
+                                                                            QMessageBox {
+                                                                                background-color: #121212;
+                                                                                color: white;
+                                                                                font-size: 14px;
+                                                                            }
+                                                                            QPushButton {
+                                                                                background-color: #333;
+                                                                                color: white;
+                                                                                border-radius: 6px;
+                                                                                padding: 6px;
+                                                                            }
+                                                                            QPushButton:hover {
+                                                                                background-color: #555;
+                                                                            }
+                                                                        """)
+                        msg.exec()
 
     # 🟡 Добавление нового конспекта
     def add_conspect(self):
@@ -123,7 +163,27 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
         date = self.ui.age.text().strip()
 
         if not subject or not date:
-            QMessageBox.warning(self, 'Ошибка', 'Заполните все поля')
+            msg = QMessageBox(self)
+            msg.setWindowTitle('Ошибка')
+            msg.setText('Заполните все поля')
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setStyleSheet("""
+                                                    QMessageBox {
+                                                        background-color: #121212;
+                                                        color: white;
+                                                        font-size: 14px;
+                                                    }
+                                                    QPushButton {
+                                                        background-color: #333;
+                                                        color: white;
+                                                        border-radius: 6px;
+                                                        padding: 6px;
+                                                    }
+                                                    QPushButton:hover {
+                                                        background-color: #555;
+                                                    }
+                                                """)
+            msg.exec()
             return
 
         # добавляем в базу
@@ -147,7 +207,27 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
     def delete_selected(self):
         row = self.ui.table.currentRow()
         if row < 0:
-            QMessageBox.warning(self, 'Ошибка', 'Выберите строку для удаления')
+            msg = QMessageBox(self)
+            msg.setWindowTitle('Ошибка')
+            msg.setText('Выберите строку для удаления')
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setStyleSheet("""
+                                        QMessageBox {
+                                            background-color: #121212;
+                                            color: white;
+                                            font-size: 14px;
+                                        }
+                                        QPushButton {
+                                            background-color: #333;
+                                            color: white;
+                                            border-radius: 6px;
+                                            padding: 6px;
+                                        }
+                                        QPushButton:hover {
+                                            background-color: #555;
+                                        }
+                                    """)
+            msg.exec()
             return
 
         subject = self.ui.table.item(row, 0).text()
@@ -169,11 +249,51 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
     def download_selected(self):
         row = self.ui.table.currentRow()
         if row < 0:
-            QMessageBox.warning(self, 'Ошибка', 'Выберите конспект для скачивания')
+            msg = QMessageBox(self)
+            msg.setWindowTitle('Ошибка')
+            msg.setText('Выберите конспект для скачивания')
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setStyleSheet("""
+                            QMessageBox {
+                                background-color: #121212;
+                                color: white;
+                                font-size: 14px;
+                            }
+                            QPushButton {
+                                background-color: #333;
+                                color: white;
+                                border-radius: 6px;
+                                padding: 6px;
+                            }
+                            QPushButton:hover {
+                                background-color: #555;
+                            }
+                        """)
+            msg.exec()
             return
         file_name = self.ui.table.item(row, 4).text()
         link = self.ui.table.item(row, 1).text()
-        QMessageBox.information(self, 'Скачивание', f'Скачивание файла:\n{file_name}')
+        msg = QMessageBox(self)
+        msg.setWindowTitle('Скачивание')
+        msg.setText(f'Скачивание файла:\n{file_name}')
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setStyleSheet("""
+                        QMessageBox {
+                            background-color: #121212;
+                            color: white;
+                            font-size: 14px;
+                        }
+                        QPushButton {
+                            background-color: #333;
+                            color: white;
+                            border-radius: 6px;
+                            padding: 6px;
+                        }
+                        QPushButton:hover {
+                            background-color: #555;
+                        }
+                    """)
+        msg.exec()
         download_from_gdrive(link, file_name)
 
     # 🟡 Назад
@@ -217,10 +337,50 @@ class Log_Window(QMainWindow):
     def process_registration(self):  # Обработка нажатия кнопки
         is_valid, message = self.validate_registration_data()
         if is_valid:
-            QMessageBox.information(self, "Успех", "Аккаунт успешно создан")
+            msg = QMessageBox(self)
+            msg.setWindowTitle("Успех")
+            msg.setText("Аккаунт успешно создан")
+            msg.setIcon(QMessageBox.Icon.Information)
+            msg.setStyleSheet("""
+                QMessageBox {
+                    background-color: #121212;
+                    color: white;
+                    font-size: 14px;
+                }
+                QPushButton {
+                    background-color: #333;
+                    color: white;
+                    border-radius: 6px;
+                    padding: 6px;
+                }
+                QPushButton:hover {
+                    background-color: #555;
+                }
+            """)
+            msg.exec()
             self.goto_ScreenFirst()
         else:
-            QMessageBox.warning(self, "Ошибка регистрации", message)
+            msg = QMessageBox(self)
+            msg.setWindowTitle("Ошибка регистрации")
+            msg.setText(message)
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setStyleSheet("""
+                QMessageBox {
+                    background-color: #121212;
+                    color: white;
+                    font-size: 14px;
+                }
+                QPushButton {
+                    background-color: #333;
+                    color: white;
+                    border-radius: 6px;
+                    padding: 6px;
+                }
+                QPushButton:hover {
+                    background-color: #555;
+                }
+            """)
+            msg.exec()
 
     def goto_ScreenFirst(self):  # Возврат на окно авторизации
         self.hide()
@@ -274,7 +434,27 @@ class First_Window(QMainWindow):
         if is_valid:
             self.gotoScreen_Main()
         else:
-            QMessageBox.warning(self, "Ошибка авторизации", message)
+            msg = QMessageBox(self)
+            msg.setWindowTitle("Ошибка регистрации")
+            msg.setText(message)
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setStyleSheet("""
+                QMessageBox {
+                    background-color: #121212;
+                    color: white;
+                    font-size: 14px;
+                }
+                QPushButton {
+                    background-color: #333;
+                    color: white;
+                    border-radius: 6px;
+                    padding: 6px;
+                }
+                QPushButton:hover {
+                    background-color: #555;
+                }
+            """)
+            msg.exec()
 
     def gotoScreen_log(self):  # переход на окно регистрации
         self.hide()
@@ -295,22 +475,6 @@ class First_Window(QMainWindow):
 
 def run():
     app = QApplication(sys.argv)
-    app.setStyleSheet("""
-    QMessageBox {
-        background-color: #0a0a0a;
-        color: white;
-        font-family: Ariel;
-        font-size: 12px;
-    }
-    QToolTip {
-                background-color: #0a0a0a;
-                color: white;
-                border: 1px solid #ff00ff;
-                padding: 6px;
-                font-family: 'Ariel';
-                font-size: 10pt;
-            }
-    """)
     window = First_Window()
     sys.exit(app.exec())  # открытие приложения
 
