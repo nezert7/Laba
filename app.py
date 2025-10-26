@@ -118,20 +118,23 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
                         msg.setText('Ссылка открывается в браузере')
                         msg.setIcon(QMessageBox.Icon.Information)
                         msg.setStyleSheet("""
-                                                                            QMessageBox {
-                                                                                color: white;
-                                                                                font-size: 14px;
-                                                                            }
-                                                                            QPushButton {
-                                                                                background-color: #333;
-                                                                                color: white;
-                                                                                border-radius: 6px;
-                                                                                padding: 6px;
-                                                                            }
-                                                                            QPushButton:hover {
-                                                                                background-color: #555;
-                                                                            }
-                                                                        """)
+                                        QMessageBox {
+                                            background-color: #121212;
+                                        }
+                                        QLabel {
+                                            color: white;
+                                            font-size: 14px;
+                                        }
+                                        QPushButton {
+                                            background-color: #333;
+                                            color: white;
+                                            border-radius: 6px;
+                                            padding: 6px;
+                                        }
+                                        QPushButton:hover {
+                                            background-color: #555;
+                                        }
+                                    """)
                         msg.exec()
                     except Exception as e:
                         msg = QMessageBox(self)
@@ -139,20 +142,23 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
                         msg.setText(f'Не удалось открыть ссылку: {str(e)}')
                         msg.setIcon(QMessageBox.Icon.Critical)
                         msg.setStyleSheet("""
-                                                                            QMessageBox {
-                                                                                color: white;
-                                                                                font-size: 14px;
-                                                                            }
-                                                                            QPushButton {
-                                                                                background-color: #333;
-                                                                                color: white;
-                                                                                border-radius: 6px;
-                                                                                padding: 6px;
-                                                                            }
-                                                                            QPushButton:hover {
-                                                                                background-color: #555;
-                                                                            }
-                                                                        """)
+                                        QMessageBox {
+                                            background-color: #121212;
+                                        }
+                                        QLabel {
+                                            color: white;
+                                            font-size: 14px;
+                                        }
+                                        QPushButton {
+                                            background-color: #333;
+                                            color: white;
+                                            border-radius: 6px;
+                                            padding: 6px;
+                                        }
+                                        QPushButton:hover {
+                                            background-color: #555;
+                                        }
+                                    """)
                         msg.exec()
 
     # 🟡 Добавление нового конспекта
@@ -166,20 +172,23 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
             msg.setText('Заполните все поля')
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setStyleSheet("""
-                                                    QMessageBox {
-                                                        color: white;
-                                                        font-size: 14px;
-                                                    }
-                                                    QPushButton {
-                                                        background-color: #333;
-                                                        color: white;
-                                                        border-radius: 6px;
-                                                        padding: 6px;
-                                                    }
-                                                    QPushButton:hover {
-                                                        background-color: #555;
-                                                    }
-                                                """)
+                            QMessageBox {
+                                background-color: #121212;
+                            }
+                            QLabel {
+                                color: white;
+                                font-size: 14px;
+                            }
+                            QPushButton {
+                                background-color: #333;
+                                color: white;
+                                border-radius: 6px;
+                                padding: 6px;
+                            }
+                            QPushButton:hover {
+                                background-color: #555;
+                            }
+                        """)
             msg.exec()
             return
 
@@ -209,20 +218,23 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
             msg.setText('Выберите строку для удаления')
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setStyleSheet("""
-                                        QMessageBox {
-                                            color: white;
-                                            font-size: 14px;
-                                        }
-                                        QPushButton {
-                                            background-color: #333;
-                                            color: white;
-                                            border-radius: 6px;
-                                            padding: 6px;
-                                        }
-                                        QPushButton:hover {
-                                            background-color: #555;
-                                        }
-                                    """)
+                            QMessageBox {
+                                background-color: #121212;
+                            }
+                            QLabel {
+                                color: white;
+                                font-size: 14px;
+                            }
+                            QPushButton {
+                                background-color: #333;
+                                color: white;
+                                border-radius: 6px;
+                                padding: 6px;
+                            }
+                            QPushButton:hover {
+                                background-color: #555;
+                            }
+                        """)
             msg.exec()
             return
 
@@ -251,6 +263,9 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setStyleSheet("""
                             QMessageBox {
+                                background-color: #121212;
+                            }
+                            QLabel {
                                 color: white;
                                 font-size: 14px;
                             }
@@ -274,6 +289,9 @@ class Main_Window(QMainWindow):  # окно с выбором предмета, 
         msg.setIcon(QMessageBox.Icon.Information)
         msg.setStyleSheet("""
                         QMessageBox {
+                            background-color: #121212;
+                        }
+                        QLabel {
                             color: white;
                             font-size: 14px;
                         }
@@ -336,20 +354,23 @@ class Log_Window(QMainWindow):
             msg.setText("Аккаунт успешно создан")
             msg.setIcon(QMessageBox.Icon.Information)
             msg.setStyleSheet("""
-                QMessageBox {
-                    color: white;
-                    font-size: 14px;
-                }
-                QPushButton {
-                    background-color: #333;
-                    color: white;
-                    border-radius: 6px;
-                    padding: 6px;
-                }
-                QPushButton:hover {
-                    background-color: #555;
-                }
-            """)
+                            QMessageBox {
+                                background-color: #121212;
+                            }
+                            QLabel {
+                                color: white;
+                                font-size: 14px;
+                            }
+                            QPushButton {
+                                background-color: #333;
+                                color: white;
+                                border-radius: 6px;
+                                padding: 6px;
+                            }
+                            QPushButton:hover {
+                                background-color: #555;
+                            }
+                        """)
             msg.exec()
             self.goto_ScreenFirst()
         else:
@@ -358,20 +379,23 @@ class Log_Window(QMainWindow):
             msg.setText(message)
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setStyleSheet("""
-                QMessageBox {
-                    color: white;
-                    font-size: 14px;
-                }
-                QPushButton {
-                    background-color: #333;
-                    color: white;
-                    border-radius: 6px;
-                    padding: 6px;
-                }
-                QPushButton:hover {
-                    background-color: #555;
-                }
-            """)
+                            QMessageBox {
+                                background-color: #121212;
+                            }
+                            QLabel {
+                                color: white;
+                                font-size: 14px;
+                            }
+                            QPushButton {
+                                background-color: #333;
+                                color: white;
+                                border-radius: 6px;
+                                padding: 6px;
+                            }
+                            QPushButton:hover {
+                                background-color: #555;
+                            }
+                        """)
             msg.exec()
 
     def goto_ScreenFirst(self):  # Возврат на окно авторизации
@@ -431,20 +455,23 @@ class First_Window(QMainWindow):
             msg.setText(message)
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setStyleSheet("""
-                QMessageBox {
-                    color: white;
-                    font-size: 14px;
-                }
-                QPushButton {
-                    background-color: #333;
-                    color: white;
-                    border-radius: 6px;
-                    padding: 6px;
-                }
-                QPushButton:hover {
-                    background-color: #555;
-                }
-            """)
+                            QMessageBox {
+                                background-color: #121212;
+                            }
+                            QLabel {
+                                color: white;
+                                font-size: 14px;
+                            }
+                            QPushButton {
+                                background-color: #333;
+                                color: white;
+                                border-radius: 6px;
+                                padding: 6px;
+                            }
+                            QPushButton:hover {
+                                background-color: #555;
+                            }
+                        """)
             msg.exec()
 
     def gotoScreen_log(self):  # переход на окно регистрации
